@@ -13,53 +13,57 @@ export const createPost = async (postData, userId) => {
 export const getUserPosts = async (userId) => {
   const posts = await postRepo.getPostsByUserId(userId);
   const { PostStats } = await import("../../models/postModel/index.mjs");
-  const parsedPosts = await Promise.all(posts.map(async (post) => {
-    const views = await PostStats.sum("views", { where: { postId: post.id } });
-    const raw = post.toJSON ? post.toJSON() : post;
+  const parsedPosts = await Promise.all(
+    posts.map(async (post) => {
+      const views = await PostStats.sum("views", {
+        where: { postId: post.id },
+      });
+      const raw = post.toJSON ? post.toJSON() : post;
 
-    const safeParse = (value) => {
-      if (!value) return [];
-      if (typeof value === "string" && value.trim().startsWith("[")) {
-        try {
-          return JSON.parse(value);
-        } catch {
-          return [];
-        }
-      }
-      return typeof value === "string" ? [value] : value;
-    };
-
-    let author = raw.user || null;
-    if (author && author.toJSON) author = author.toJSON();
-    const toArray = (v) => (Array.isArray(v) ? v : v ? JSON.parse(v) : []);
-
-    return {
-      ...raw,
-      tags: safeParse(raw.tags),
-      homeStyle: safeParse(raw.homeStyle),
-      amenities: safeParse(raw.amenities),
-      images: safeParse(raw.images),
-      video:
-        raw.video &&
-        typeof raw.video === "string" &&
-        raw.video.trim().startsWith("[")
-          ? JSON.parse(raw.video)
-          : raw.video,
-      user: author
-        ? {
-            id: author.id,
-            first_name: author.first_name,
-            last_name: author.last_name,
-            user_name: author.user_name,
-            role: author.role,
-            avatarUrl: author.avatarUrl,
-            followers_count: toArray(author.followers_ids).length,
-            following_count: toArray(author.following_ids).length,
+      const safeParse = (value) => {
+        if (!value) return [];
+        if (typeof value === "string" && value.trim().startsWith("[")) {
+          try {
+            return JSON.parse(value);
+          } catch {
+            return [];
           }
-        : null,
-      totalViews: views || 0,
-    };
-  }));
+        }
+        return typeof value === "string" ? [value] : value;
+      };
+
+      let author = raw.user || null;
+      if (author && author.toJSON) author = author.toJSON();
+      const toArray = (v) => (Array.isArray(v) ? v : v ? JSON.parse(v) : []);
+
+      return {
+        ...raw,
+        tags: safeParse(raw.tags),
+        homeStyle: safeParse(raw.homeStyle),
+        amenities: safeParse(raw.amenities),
+        images: safeParse(raw.images),
+        video:
+          raw.video &&
+          typeof raw.video === "string" &&
+          raw.video.trim().startsWith("[")
+            ? JSON.parse(raw.video)
+            : raw.video,
+        user: author
+          ? {
+              id: author.id,
+              first_name: author.first_name,
+              last_name: author.last_name,
+              user_name: author.user_name,
+              role: author.role,
+              avatarUrl: author.avatarUrl,
+              followers_count: toArray(author.followers_ids).length,
+              following_count: toArray(author.following_ids).length,
+            }
+          : null,
+        totalViews: views || 0,
+      };
+    }),
+  );
   return {
     status: "success",
     message: "Posts fetched successfully",
@@ -209,20 +213,16 @@ export const getPaginatedPosts = async (page, pageSize) => {
 //   }
 export const getAllPosts = async () => {
   // Import models directly for counting
-  const { BuyerReviewPost } = await import(
-    "../../models/buyerReviewPostModel/index.mjs"
-  );
-  const { BuyerShare } = await import(
-    "../../models/buyerSharePostModel/index.mjs"
-  );
-  const { BuyerSavedPost } = await import(
-    "../../models/buyerSavedPostModel/index.mjs"
-  );
+  const { BuyerReviewPost } =
+    await import("../../models/buyerReviewPostModel/index.mjs");
+  const { BuyerShare } =
+    await import("../../models/buyerSharePostModel/index.mjs");
+  const { BuyerSavedPost } =
+    await import("../../models/buyerSavedPostModel/index.mjs");
   const { getPostLikeCount } = await import("./postLike.service.mjs");
   const { sequelize } = await import("../../models/postModel/index.mjs");
-  const { default: PostCommentModel } = await import(
-    "../../models/postModel/postComment.model.mjs"
-  );
+  const { default: PostCommentModel } =
+    await import("../../models/postModel/postComment.model.mjs");
   const { DataTypes } = await import("sequelize");
 
   const PostComment = PostCommentModel(sequelize, DataTypes);
@@ -287,6 +287,7 @@ export const getAllPosts = async () => {
       if (avgRatingResult && avgRatingResult.avgRating !== null) {
         ratingCount = parseFloat(Number(avgRatingResult.avgRating).toFixed(1));
       }
+
       return {
         ...raw,
         tags: safeParse(raw.tags),
@@ -305,8 +306,20 @@ export const getAllPosts = async () => {
         shareCount,
         ratingCount,
         reviewCount,
+        // ADD ALL NEW RENTAL FIELDS HERE:
+        listing_type: raw.listing_type || "FOR_SALE",
+        monthly_rent: raw.monthly_rent || null,
+        security_deposit: raw.security_deposit || null,
+        lease_term: raw.lease_term || null,
+        available_from: raw.available_from || null,
+        pet_policy: raw.pet_policy || null,
+        parking: raw.parking || null,
+        furnished: raw.furnished || false,
+        application_url: raw.application_url || null,
+        manager_id: raw.manager_id || null,
+        is_verified_manager: raw.is_verified_manager || false,
       };
-    })
+    }),
   );
 
   return {
@@ -347,9 +360,8 @@ export const deletePost = async (postId, userId) => {
   };
 };
 export const getPostPerformance = async (agentId) => {
-  const { currentMonthViews, previousMonthViews } = await postRepo.getPostViews(
-    agentId
-  );
+  const { currentMonthViews, previousMonthViews } =
+    await postRepo.getPostViews(agentId);
 
   const percentageChange =
     previousMonthViews === 0

@@ -21,10 +21,11 @@ import {
   saveTourController,
   unsaveTourController,
 } from "../controllers/buyerSavedPost.controller.mjs";
+import { tourBookPayment } from "../controllers/stripe.controller.mjs";
 
 const router = express.Router();
 
-router.post("/book-tour", isAuthenticated, createTourRequest);
+router.post("/book-tour", tourBookPayment);
 router.get("/get-all-tours", isAuthenticated, getAllTours);
 router.get("/get-paginated-tours", getPaginatedTours);
 router.delete("/delete/:id", deleteTourRequest);

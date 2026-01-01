@@ -13,7 +13,7 @@ async function checkPostCommentsStructure() {
     console.log("\n📋 PostComments table columns:");
     console.table(tableDesc.map(col => ({ 
       Field: col.Field, 
-      Type: col.Type, 
+      Type: col.Type,  
       Null: col.Null,
       Default: col.Default,
       Key: col.Key

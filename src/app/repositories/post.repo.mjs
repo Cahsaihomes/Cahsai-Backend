@@ -8,7 +8,7 @@ const postRepo = {
   },
   getPostsByUserId: async (userId) => {
     return await Post.findAll({
-      where: { userId },
+      where: { userId },  
       order: [["createdAt", "DESC"]],
       include: [
         {

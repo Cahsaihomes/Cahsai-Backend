@@ -10,85 +10,102 @@ import {
 } from "../validations/post.validation.mjs";
 
 export const createPost = async (req, res) => {
-  console.log("Request body:", req.body);
+  console.log("Request body (raw):", req.body);
+
   try {
+    /* =====================================================
+       1️⃣ Joi Validation (ONLY validation here)
+    ===================================================== */
     const { error } = createPostValidation.validate(req.body, {
       abortEarly: false,
     });
+
     if (error) {
+      console.log("❌ Joi Validation Error:", error.details);
+
       return res.status(400).json({
         status: "error",
-        message: error.details.map((d) => d.message).join(", "),
+        errors: error.details.map((d) => ({
+          field: d.path.join("."),
+          message: d.message,
+        })),
       });
     }
 
+    /* =====================================================
+       2️⃣ Normalize numeric & boolean fields (AFTER validation)
+    ===================================================== */
+    const normalizeNumber = (v) =>
+      v === "" || v === null || v === undefined ? null : Number(v);
+
+    const normalizeBoolean = (v) =>
+      typeof v === "string" ? v === "true" : Boolean(v);
+
+    req.body.price = normalizeNumber(req.body.price);
+    req.body.bedrooms = normalizeNumber(req.body.bedrooms);
+    req.body.bathrooms = normalizeNumber(req.body.bathrooms);
+    req.body.monthly_rent = normalizeNumber(req.body.monthly_rent);
+    req.body.security_deposit = normalizeNumber(req.body.security_deposit);
+    req.body.manager_id = normalizeNumber(req.body.manager_id);
+
+    req.body.furnished = normalizeBoolean(req.body.furnished);
+    req.body.is_verified_manager = normalizeBoolean(
+      req.body.is_verified_manager
+    );
+
+    /* =====================================================
+       3️⃣ Handle files (multer)
+    ===================================================== */
     const imageFiles = req.files?.post_images || [];
     const videoFiles = req.files?.post_videos || [];
 
-    // if (imageFiles.length > 0 && videoFiles.length > 0) {
-    //   return res.status(400).json({
-    //     status: "error",
-    //     message: "You can upload either one video OR up to 5 images, not both.",
-    //   });
-    // }
     if (imageFiles.length > 5) {
       return res.status(400).json({
         status: "error",
         message: "You can upload a maximum of 5 images.",
       });
     }
+
     if (videoFiles.length > 1) {
       return res.status(400).json({
         status: "error",
         message: "You can upload only 1 video.",
       });
     }
+
     let imageUrls = [];
-    if (imageFiles?.length > 0) {
-      for (const file of imageFiles) {
-        const url = await uploadToCloudinary(file, "post_images");
-        imageUrls.push(url);
-      }
+    for (const file of imageFiles) {
+      const url = await uploadToCloudinary(file, "post_images");
+      imageUrls.push(url);
     }
 
     let videoUrl = null;
-    if (videoFiles?.length > 0) {
-      videoUrl = await uploadToCloudinary(videoFiles[0], "post_videos");
+    if (videoFiles.length > 0) {
+      videoUrl = await uploadToCloudinary(
+        videoFiles[0],
+        "post_videos"
+      );
     }
-    // const tagsArray = req.body.tags
-    //   ? req.body.tags.split(",").map((t) => t.trim())
-    //   : [];
-    // const amenitiesArray = req.body.amenities
-    //   ? req.body.amenities.split(",").map((a) => a.trim())
-    //   : [];
 
-    let tagsArray = [];
-    if (req.body.tags) {
+    /* =====================================================
+       4️⃣ Parse array-like fields
+    ===================================================== */
+    const parseArrayField = (value) => {
+      if (!value) return [];
       try {
-        tagsArray = JSON.parse(req.body.tags);
-      } catch (e) {
-        tagsArray = req.body.tags.split(",").map((h) => h.trim());
+        return JSON.parse(value);
+      } catch {
+        return value.split(",").map((v) => v.trim());
       }
-    }
+    };
 
-    let amenitiesArray = [];
-    if (req.body.amenities) {
-      try {
-        amenitiesArray = JSON.parse(req.body.amenities);
-      } catch (e) {
-        amenitiesArray = req.body.amenities.split(",").map((h) => h.trim());
-      }
-    }
+    const tagsArray = parseArrayField(req.body.tags);
+    const amenitiesArray = parseArrayField(req.body.amenities);
+    const homeStyleArray = parseArrayField(req.body.homeStyle);
 
-    let homeStyleArray = [];
-    if (req.body.homeStyle) {
-      try {
-        homeStyleArray = JSON.parse(req.body.homeStyle);
-      } catch (e) {
-        homeStyleArray = req.body.homeStyle.split(",").map((h) => h.trim());
-      }
-    }
-
+    /* =====================================================
+       5️⃣ Create Post
+    ===================================================== */
     const result = await postService.createPost(
       {
         ...req.body,
@@ -103,18 +120,20 @@ export const createPost = async (req, res) => {
       req.user.id
     );
 
-    // Ensure isPromoted is included in the response data
-    if (result && result.data && typeof result.data === 'object') {
+    if (result?.data && typeof result.data === "object") {
       result.data.isPromoted = false;
     }
+
     return res.status(201).json(result);
   } catch (error) {
-    console.error("Error in createPost:", error);
-    return res
-      .status(500)
-      .json({ status: "error", message: "Internal Server Error" });
+    console.error("🔥 Error in createPost:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Internal Server Error",
+    });
   }
 };
+
 
 export const getUserPosts = async (req, res) => {
   try {

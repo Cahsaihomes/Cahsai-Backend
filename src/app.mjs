@@ -15,6 +15,7 @@ import paymentRoutes from "./routes/payment.routes.mjs";
 import webhookRoutes from "./routes/webhook.routes.mjs";
 import notificationRoutes from "./routes/notification.routes.mjs";
 import errorHandler from "./middlewares/errorHandler.mjs";
+import rakutenRoutes from "./routes/rakuten.routes.mjs"
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
@@ -55,6 +56,7 @@ app.use("/api/chats", chatRoutes);
 app.use("/api/stripe", stripeRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/webhook", webhookRoutes);
+app.use("/api/rakuten", rakutenRoutes);
 
 app.use(errorHandler);
 

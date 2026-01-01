@@ -2,39 +2,50 @@ import Joi from "joi";
 
 export const createPostValidation = Joi.object({
   title: Joi.string().allow("", null),
-  price: Joi.number().precision(2).required().messages({
-    "number.base": "Price must be a number.",
-    "any.required": "Price is required.",
-  }),
-  zipCode: Joi.string().required().messages({
-    "any.required": "Zip code is required.",
-  }),
-  city: Joi.string().required().messages({
-    "any.required": "City is required.",
-  }),
-  location: Joi.string().required().messages({
-    "any.required": "Location is required.",
-  }),
+
+  price: Joi.alternatives()
+    .try(Joi.number().precision(2), Joi.string().pattern(/^\d+(\.\d+)?$/))
+    .required(),
+
+  zipCode: Joi.string().required(),
+  city: Joi.string().required(),
+  location: Joi.string().required(),
+
   description: Joi.string().allow("", null),
-  bedrooms: Joi.number().integer().required().messages({
-    "number.base": "Bedrooms must be a number.",
-    "any.required": "Bedrooms are required.",
-  }),
-  bathrooms: Joi.number().integer().required().messages({
-    "number.base": "Bathrooms must be a number.",
-    "any.required": "Bathrooms are required.",
-  }),
-  homeStyle: Joi.alternatives()
-    .try(
-      Joi.array().items(
-        Joi.string().valid("Pet Friendly", "Modern Homes", "Budget Rooms")
-      ),
-      Joi.string().custom((value) => value.split(",").map((h) => h.trim()))
-    )
-    .optional(),
+
+  bedrooms: Joi.alternatives()
+    .try(Joi.number().integer(), Joi.string().pattern(/^\d+$/))
+    .required(),
+
+  bathrooms: Joi.alternatives()
+    .try(Joi.number().integer(), Joi.string().pattern(/^\d+$/))
+    .required(),
+
   tags: Joi.string().allow("", null),
   amenities: Joi.string().allow("", null),
-});
+  homeStyle: Joi.string().allow("", null),
+
+  // ✅ RENTAL FIELDS
+  listing_type: Joi.string().valid("FOR_SALE", "FOR_RENT", "STAY"),
+  monthly_rent: Joi.alternatives()
+    .try(Joi.number(), Joi.string().allow("", null)),
+  security_deposit: Joi.alternatives()
+    .try(Joi.number(), Joi.string().allow("", null)),
+  lease_term: Joi.string().allow("", null),
+  available_from: Joi.date().allow("", null),
+  pet_policy: Joi.string().allow("", null),
+  parking: Joi.string().allow("", null),
+  furnished: Joi.alternatives()
+    .try(Joi.boolean(), Joi.string().valid("true", "false")),
+  application_url: Joi.string().allow("", null),
+  manager_id: Joi.alternatives()
+    .try(Joi.number(), Joi.string().allow("", null)),
+  is_verified_manager: Joi.alternatives()
+    .try(Joi.boolean(), Joi.string().valid("true", "false")),
+})
+.options({ allowUnknown: true });
+
+
 
 export const updatePostValidation = Joi.object({
   price: Joi.number().precision(2).messages({

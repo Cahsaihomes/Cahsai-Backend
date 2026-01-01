@@ -25,7 +25,7 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: ["https://cahsai-one.vercel.app","https://cahsai-nine.vercel.app", "http://localhost:3000","http://localhost:3001", "https://cahsai-frontend-production.up.railway.app"],
+    origin: ["https://cahsai-one.vercel.app","https://cahsai-nine.vercel.app", "http://localhost:3000","http://localhost:3001", "https://cahsai-frontend-production.up.railway.app","https://cahsai-frontend-production.up.railway.app"],
     credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: [

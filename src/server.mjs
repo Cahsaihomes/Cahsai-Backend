@@ -22,6 +22,7 @@ import setupSocket from "./socket/index.mjs";
       "http://localhost:3000",
       "http://localhost:3001",
       "http://localhost:5000",
+      "https://cahsai-frontend-production.up.railway.app",
       "https://cahsai-frontend-production.up.railway.app"
     ];
     const io = new Server(httpServer, {

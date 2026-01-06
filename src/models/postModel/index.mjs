@@ -4,25 +4,26 @@ import PostStatsModel from "./postStats.model.mjs";
 import PostModel from "./post.model.mjs";
 import PostCommentModel from "./postComment.model.mjs";
 import CommentLikeModel from "./commentLike.model.mjs";
-import userModel from "../userModel/user.model.mjs";
+import PostLikeModel from "./postLike.model.mjs";
+import { User } from "../userModel/index.mjs";
 
 // Initialize models
 
-const User = userModel(sequelize);
 const Post = PostModel(sequelize, DataTypes);
 const PostStats = PostStatsModel(sequelize, DataTypes);
 const PostComment = PostCommentModel(sequelize, DataTypes);
 const CommentLike = CommentLikeModel(sequelize, DataTypes);
+const PostLike = PostLikeModel(sequelize, DataTypes);
 
+// Post-User associations
 User.hasMany(Post, {
   foreignKey: "userId",
-  as: "posts", // user.posts[]
+  as: "posts",
   onDelete: "CASCADE",
 });
-
 Post.belongsTo(User, {
   foreignKey: "userId",
-  as: "user", // post.user
+  as: "user",
   onDelete: "CASCADE",
 });
 
@@ -53,6 +54,28 @@ User.hasMany(PostComment, {
   onDelete: "CASCADE",
 });
 PostComment.belongsTo(User, {
+  foreignKey: "userId",
+  as: "user",
+  onDelete: "CASCADE",
+});
+
+Post.hasMany(PostLike, {
+  foreignKey: "postId",
+  as: "likes",
+  onDelete: "CASCADE",
+});
+PostLike.belongsTo(Post, {
+  foreignKey: "postId",
+  as: "post",
+  onDelete: "CASCADE",
+});
+
+User.hasMany(PostLike, {
+  foreignKey: "userId",
+  as: "postLikes",
+  onDelete: "CASCADE",
+});
+PostLike.belongsTo(User, {
   foreignKey: "userId",
   as: "user",
   onDelete: "CASCADE",
@@ -91,4 +114,4 @@ CommentLike.belongsTo(User, {
 });
 
 // Export everything
-export { sequelize, Post, PostStats, PostComment, CommentLike, User };
+export { sequelize, Post, PostStats, PostComment, CommentLike, PostLike, User };

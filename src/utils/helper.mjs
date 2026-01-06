@@ -35,14 +35,23 @@ export const getCardBrand = (cardNumber) => {
 
 export const uploadToCloudinary = (file, folder) => {
   return new Promise((resolve, reject) => {
+    console.log('uploadToCloudinary called with:', {
+      filename: file.originalname,
+      size: file.size,
+      bufferLength: file.buffer ? file.buffer.length : 'no buffer',
+      folder: folder
+    });
+    
     let resourceType = "auto";
     cloudinary.uploader
       .upload_stream(
         { folder: folder, resource_type: resourceType },
         (error, result) => {
           if (error) {
+            console.error('Cloudinary upload error:', error);
             reject(error);
           } else {
+            console.log('Cloudinary upload success:', result.secure_url);
             resolve(result.secure_url);
           }
         }

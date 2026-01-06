@@ -244,6 +244,7 @@ export const loginUser = async ({ email, password }) => {
       "acceptedTerms",
       "isDeleted",
       "avatarUrl",
+      "isRentalCompany",
     ],
   });
 
@@ -276,7 +277,7 @@ export const loginUser = async ({ email, password }) => {
     return { status: "error", message: "Invalid email or password" };
 
   const token = jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
+    { id: user.id, email: user.email, role: user.role, isRentalCompany: user.isRentalCompany },
     process.env.JWT_SECRET,
     { expiresIn: "1d" }
   );

@@ -83,6 +83,7 @@ export const createPost = async (req, res) => {
     const tagsArray = parseArrayField(req.body.tags);
     const amenitiesArray = parseArrayField(req.body.amenities);
     const homeStyleArray = parseArrayField(req.body.homeStyle);
+    const featuresArray = parseArrayField(req.body.features);
 
     /* =====================================================
        5️⃣ Create Post
@@ -93,6 +94,7 @@ export const createPost = async (req, res) => {
         tags: tagsArray,
         amenities: amenitiesArray,
         homeStyle: homeStyleArray,
+        features: featuresArray,
         images: imageUrls.length ? imageUrls : null,
         video: videoUrl,
         forYou: true,
@@ -271,6 +273,13 @@ export const updatePost = async (req, res) => {
     if (req.body.publishToWatchHomes !== undefined) updateData.publishToWatchHomes = req.body.publishToWatchHomes;
     if (req.body.postType) updateData.postType = req.body.postType;
     if (req.body.linkedPostId) updateData.linkedPostId = req.body.linkedPostId;
+    if (req.body.features) {
+      try {
+        updateData.features = JSON.parse(req.body.features);
+      } catch {
+        updateData.features = req.body.features.split(",").map((f) => f.trim());
+      }
+    }
 
     // if (req.files?.post_videos?.length > 0) {
     //   updateData.video = req.files.post_videos.map((f) => f.filename);

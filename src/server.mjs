@@ -11,7 +11,9 @@ import setupSocket from "./socket/index.mjs";
     await sequelize.authenticate();
     console.log("✅ Database connected");
 
-    await sequelize.sync({ alter: true });
+    // Sync database schema with alter: true
+    await sequelize.sync({ alter: false });
+    
     const httpServer = createServer(app);
 
     // Setup socket.io

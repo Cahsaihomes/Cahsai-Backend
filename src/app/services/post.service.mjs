@@ -75,6 +75,7 @@ export const getUserPosts = async (userId) => {
         publishToWatchHomes: raw.publishToWatchHomes || false,
         postType: raw.postType || null,
         linkedPostId: raw.linkedPostId || null,
+        features: raw.features || null,
       };
     }),
   );
@@ -145,6 +146,7 @@ export const getPaginatedPosts = async (page, pageSize) => {
       publishToWatchHomes: raw.publishToWatchHomes || false,
       postType: raw.postType || null,
       linkedPostId: raw.linkedPostId || null,
+      // features: raw.features || null,
     };
   });
   return {
@@ -360,6 +362,7 @@ export const getAllPosts = async () => {
         publishToWatchHomes: raw.publishToWatchHomes || false,
         postType: raw.postType || null,
         linkedPostId: raw.linkedPostId || null,
+        features: raw.features || null,
       };
     }),
   );

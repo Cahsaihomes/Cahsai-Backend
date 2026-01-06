@@ -17,7 +17,7 @@ export default (sequelize) => {
       allowNull: true,
     },
     price: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.DECIMAL(15, 2),
       allowNull: true,
     },
     zipCode: {
@@ -180,6 +180,10 @@ export default (sequelize) => {
     },
     linkedPostId: {
       type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: true,
+    },
+     features: {
+      type: DataTypes.JSON,
       allowNull: true,
     },
   });

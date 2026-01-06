@@ -61,6 +61,20 @@ export const getUserPosts = async (userId) => {
             }
           : null,
         totalViews: views || 0,
+        // NEW PROPERTY FIELDS:
+        street: raw.street || null,
+        unit: raw.unit || null,
+        state: raw.state || null,
+        propertyType: raw.propertyType || null,
+        lotSize: raw.lotSize || null,
+        yearBuilt: raw.yearBuilt || null,
+        hoaFees: raw.hoaFees || null,
+        agentName: raw.agentName || null,
+        brokerageName: raw.brokerageName || null,
+        stateDisclosures: raw.stateDisclosures || null,
+        publishToWatchHomes: raw.publishToWatchHomes || false,
+        postType: raw.postType || null,
+        linkedPostId: raw.linkedPostId || null,
       };
     }),
   );
@@ -117,6 +131,20 @@ export const getPaginatedPosts = async (page, pageSize) => {
             following_count: toArray(author.following_ids).length,
           }
         : null,
+      // NEW PROPERTY FIELDS:
+      street: raw.street || null,
+      unit: raw.unit || null,
+      state: raw.state || null,
+      propertyType: raw.propertyType || null,
+      lotSize: raw.lotSize || null,
+      yearBuilt: raw.yearBuilt || null,
+      hoaFees: raw.hoaFees || null,
+      agentName: raw.agentName || null,
+      brokerageName: raw.brokerageName || null,
+      stateDisclosures: raw.stateDisclosures || null,
+      publishToWatchHomes: raw.publishToWatchHomes || false,
+      postType: raw.postType || null,
+      linkedPostId: raw.linkedPostId || null,
     };
   });
   return {
@@ -318,6 +346,20 @@ export const getAllPosts = async () => {
         application_url: raw.application_url || null,
         manager_id: raw.manager_id || null,
         is_verified_manager: raw.is_verified_manager || false,
+        // NEW PROPERTY FIELDS:
+        street: raw.street || null,
+        unit: raw.unit || null,
+        state: raw.state || null,
+        propertyType: raw.propertyType || null,
+        lotSize: raw.lotSize || null,
+        yearBuilt: raw.yearBuilt || null,
+        hoaFees: raw.hoaFees || null,
+        agentName: raw.agentName || null,
+        brokerageName: raw.brokerageName || null,
+        stateDisclosures: raw.stateDisclosures || null,
+        publishToWatchHomes: raw.publishToWatchHomes || false,
+        postType: raw.postType || null,
+        linkedPostId: raw.linkedPostId || null,
       };
     }),
   );

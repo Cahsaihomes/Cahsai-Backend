@@ -8,6 +8,7 @@ import {
   getPostPerformance,
   getPaginatedPosts,
   getUserPosts,
+  getPostsByUserId,
   updatePost,
   getPostConversion,
   promotePost,
@@ -32,6 +33,7 @@ router.post(
   createPost
 );
 router.get("/my-posts", isAuthenticated, getUserPosts);
+router.get("/user/:userId", getPostsByUserId);
 router.get("/get-paginated-posts", getPaginatedPosts);
 router.get("/get-all-posts", getAllPosts);
 router.put(

@@ -5,21 +5,21 @@ export const createPostValidation = Joi.object({
 
   price: Joi.alternatives()
     .try(Joi.number().precision(2), Joi.string().pattern(/^\d+(\.\d+)?$/))
-    .required(),
+    .allow("", null),
 
-  zipCode: Joi.string().required(),
-  city: Joi.string().required(),
-  location: Joi.string().required(),
+  zipCode: Joi.string().allow("", null),
+  city: Joi.string().allow("", null),
+  location: Joi.string().allow("", null),
 
   description: Joi.string().allow("", null),
 
   bedrooms: Joi.alternatives()
     .try(Joi.number().integer(), Joi.string().pattern(/^\d+$/))
-    .required(),
+    .allow("", null),
 
   bathrooms: Joi.alternatives()
     .try(Joi.number().integer(), Joi.string().pattern(/^\d+$/))
-    .required(),
+    .allow("", null),
 
   tags: Joi.string().allow("", null),
   amenities: Joi.string().allow("", null),

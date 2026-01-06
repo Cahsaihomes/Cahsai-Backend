@@ -4,36 +4,13 @@ import postRepo from "../app/repositories/post.repo.mjs";
 import * as postService from "../app/services/post.service.mjs";
 import { Post } from "../models/postModel/index.mjs";
 import { uploadToCloudinary } from "../utils/helper.mjs";
-import {
-  createPostValidation,
-  updatePostValidation,
-} from "../validations/post.validation.mjs";
 
 export const createPost = async (req, res) => {
   console.log("Request body (raw):", req.body);
 
   try {
     /* =====================================================
-       1️⃣ Joi Validation (ONLY validation here)
-    ===================================================== */
-    const { error } = createPostValidation.validate(req.body, {
-      abortEarly: false,
-    });
-
-    if (error) {
-      console.log("❌ Joi Validation Error:", error.details);
-
-      return res.status(400).json({
-        status: "error",
-        errors: error.details.map((d) => ({
-          field: d.path.join("."),
-          message: d.message,
-        })),
-      });
-    }
-
-    /* =====================================================
-       2️⃣ Normalize numeric & boolean fields (AFTER validation)
+       2️⃣ Normalize numeric & boolean fields
     ===================================================== */
     const normalizeNumber = (v) =>
       v === "" || v === null || v === undefined ? null : Number(v);
@@ -52,6 +29,10 @@ export const createPost = async (req, res) => {
     req.body.is_verified_manager = normalizeBoolean(
       req.body.is_verified_manager
     );
+    req.body.publishToWatchHomes = normalizeBoolean(req.body.publishToWatchHomes);
+    req.body.yearBuilt = normalizeNumber(req.body.yearBuilt);
+    req.body.hoaFees = normalizeNumber(req.body.hoaFees);
+    req.body.linkedPostId = normalizeNumber(req.body.linkedPostId);
 
     /* =====================================================
        3️⃣ Handle files (multer)
@@ -116,6 +97,19 @@ export const createPost = async (req, res) => {
         video: videoUrl,
         forYou: true,
         isPromoted: false,
+        street: req.body.street || null,
+        unit: req.body.unit || null,
+        state: req.body.state || null,
+        propertyType: req.body.propertyType || null,
+        lotSize: req.body.lotSize || null,
+        yearBuilt: req.body.yearBuilt || null,
+        hoaFees: req.body.hoaFees || null,
+        agentName: req.body.agentName || null,
+        brokerageName: req.body.brokerageName || null,
+        stateDisclosures: req.body.stateDisclosures || null,
+        publishToWatchHomes: req.body.publishToWatchHomes || false,
+        postType: req.body.postType || null,
+        linkedPostId: req.body.linkedPostId || null,
       },
       req.user.id
     );
@@ -141,6 +135,19 @@ export const getUserPosts = async (req, res) => {
     return res.status(200).json(result);
   } catch (error) {
     console.error("Error in getUserPosts:", error);
+    return res
+      .status(500)
+      .json({ status: "error", message: "Internal Server Error" });
+  }
+};
+
+export const getPostsByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const result = await postService.getUserPosts(userId);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error in getPostsByUserId:", error);
     return res
       .status(500)
       .json({ status: "error", message: "Internal Server Error" });
@@ -249,6 +256,21 @@ export const updatePost = async (req, res) => {
           .map((a) => a.trim());
       }
     }
+
+    // New property fields
+    if (req.body.street) updateData.street = req.body.street;
+    if (req.body.unit) updateData.unit = req.body.unit;
+    if (req.body.state) updateData.state = req.body.state;
+    if (req.body.propertyType) updateData.propertyType = req.body.propertyType;
+    if (req.body.lotSize) updateData.lotSize = req.body.lotSize;
+    if (req.body.yearBuilt) updateData.yearBuilt = req.body.yearBuilt;
+    if (req.body.hoaFees) updateData.hoaFees = req.body.hoaFees;
+    if (req.body.agentName) updateData.agentName = req.body.agentName;
+    if (req.body.brokerageName) updateData.brokerageName = req.body.brokerageName;
+    if (req.body.stateDisclosures) updateData.stateDisclosures = req.body.stateDisclosures;
+    if (req.body.publishToWatchHomes !== undefined) updateData.publishToWatchHomes = req.body.publishToWatchHomes;
+    if (req.body.postType) updateData.postType = req.body.postType;
+    if (req.body.linkedPostId) updateData.linkedPostId = req.body.linkedPostId;
 
     // if (req.files?.post_videos?.length > 0) {
     //   updateData.video = req.files.post_videos.map((f) => f.filename);

@@ -14,23 +14,23 @@ export default (sequelize) => {
     },
     title: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     price: {
       type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
+      allowNull: true,
     },
     zipCode: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     city: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     location: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     description: {
       type: DataTypes.TEXT,
@@ -38,11 +38,11 @@ export default (sequelize) => {
     },
     bedrooms: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     bathrooms: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     tags: {
       type: DataTypes.JSON,
@@ -71,19 +71,19 @@ export default (sequelize) => {
     },
     userId: {
       type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: false,
+      allowNull: true,
     },
     isPromoted: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
-      allowNull: false,
+      allowNull: true,
     },
 
     // ===== NEW RENTAL FIELDS =====
     listing_type: {
       type: DataTypes.ENUM("FOR_SALE", "FOR_RENT", "STAY"),
       defaultValue: "FOR_SALE",
-      allowNull: false,
+      allowNull: true,
     },
     monthly_rent: {
       type: DataTypes.DECIMAL(10, 2),
@@ -125,6 +125,61 @@ export default (sequelize) => {
     is_verified_manager: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
+      allowNull: true,
+    },
+
+    // ===== NEW PROPERTY FIELDS =====
+    street: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    unit: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    state: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    propertyType: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    lotSize: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    yearBuilt: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    hoaFees: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+    },
+    agentName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    brokerageName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    stateDisclosures: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    publishToWatchHomes: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
+    },
+    postType: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    linkedPostId: {
+      type: DataTypes.INTEGER.UNSIGNED,
       allowNull: true,
     },
   });

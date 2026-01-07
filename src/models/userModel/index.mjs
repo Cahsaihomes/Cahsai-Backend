@@ -4,6 +4,7 @@ import PaymentDetailsModel from "./paymentDetails.model.mjs";
 import AgentModel from "./agent.model.mjs";
 import CreatorModel from "./creator.model.mjs";
 import NotificationPreferenceModel from "./notification-preference.model.mjs";
+import { Post, setupAssociations } from "../postModel/index.mjs";
 
 const User = UserModel(sequelize);
 const PaymentDetails = PaymentDetailsModel(sequelize);
@@ -51,6 +52,9 @@ NotificationPreferenceTable.belongsTo(User, {
   onDelete: "CASCADE",
 });
 
+// Setup postModel associations
+setupAssociations(User);
+
 export {
   sequelize,
   User,
@@ -58,4 +62,5 @@ export {
   AgentTable,
   CreatorTable,
   NotificationPreferenceTable,
+  Post,
 };

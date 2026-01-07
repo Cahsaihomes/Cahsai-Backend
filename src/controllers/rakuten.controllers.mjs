@@ -1,5 +1,5 @@
 import AffiliateProduct from "../models/rakutenModel/affiliateProduct.mjs";
-import generateRakutenToken from "../services/rakuten.token.mjs";
+import {generateRakutenToken} from "../services/rakuten.token.mjs";
 import { searchProducts } from "../services/rakuten.searchproduct.mjs";
 
 /*** Generate Rakuten Token */
@@ -20,7 +20,7 @@ export const generateToken = async (req, res) => {
   }
 };
 
-/*** Get & Store Products */
+/* Get & Store Products */
 export const getProducts = async (req, res) => {
   try {
     const { keyword, page = 1 } = req.query;

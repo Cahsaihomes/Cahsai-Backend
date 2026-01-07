@@ -39,9 +39,11 @@ export default (sequelize) => {
     bedrooms: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      allowNull: true,
     },
     bathrooms: {
       type: DataTypes.INTEGER,
+      allowNull: true,
       allowNull: true,
     },
     tags: {

@@ -1,5 +1,5 @@
 import { col, fn } from "sequelize";
-import { User } from "../../models/postModel/index.mjs";
+import { User } from "../../models/userModel/index.mjs";
 import postRepo from "../repositories/post.repo.mjs";
 
 export const createPost = async (postData, userId) => {

@@ -1,6 +1,7 @@
 
 import { Op } from "sequelize";
-import { Post, PostStats, User } from "../../models/postModel/index.mjs";
+import { Post, PostStats } from "../../models/postModel/index.mjs";
+import { User } from "../../models/userModel/index.mjs";
 
 const postRepo = {
   createPost: async (postData) => {

@@ -1,4 +1,5 @@
-import { Post, PostComment, CommentLike, User } from "../../models/postModel/index.mjs";
+import { Post, PostComment, CommentLike } from "../../models/postModel/index.mjs";
+import { User } from "../../models/userModel/index.mjs";
 import { notifyCommentCreated } from "../../socket/notify.mjs";
 import NotificationService from "../../services/notification.service.mjs";
 

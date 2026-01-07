@@ -12,7 +12,7 @@ import setupSocket from "./socket/index.mjs";
     console.log("✅ Database connected");
 
     // Sync database schema with alter: true
-    await sequelize.sync({ alter: false });
+    await sequelize.sync({ alter: true });
     
     const httpServer = createServer(app);
 

@@ -16,6 +16,7 @@ import { PaymentDetails } from "../../models/userModel/index.mjs";
 
 import jwt from "jsonwebtoken";
 import sendEmail from "../../utils/sendEmail.mjs";
+import { otpEmailTemplate, passwordResetEmailTemplate, welcomeEmailTemplate } from "../../utils/emailTemplates.mjs";
 import userRepo from "../repositories/user.repo.mjs";
 import { getCardBrand, uploadToCloudinary } from "../../utils/helper.mjs";
 import { Op } from "sequelize";
@@ -262,7 +263,8 @@ export const loginUser = async ({ email, password }) => {
     delete userData.performancePoints;
     delete userData.acceptedTerms;
 
-    await sendEmail(user.email, `Your OTP verification code is: ${otp}`);
+    const otpHtml = otpEmailTemplate(user.first_name, otp, 10);
+    await sendEmail(user.email, otpHtml, "🔐 Email Verification - Your OTP Code");
 
     return {
       status: "error",
@@ -386,7 +388,10 @@ export const requestOTP = async (email) => {
   const otp = Math.floor(1000 + Math.random() * 9000).toString();
   const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
   await user.update({ otp, otpExpiry });
-  await sendEmail(email, `Your password reset OTP is: ${otp}`);
+  
+  const resetEmailHtml = passwordResetEmailTemplate(user.first_name, otp, 10);
+  await sendEmail(email, resetEmailHtml, "🔐 Password Reset - Your Verification Code");
+  
   return {
     status: "success",
     message: "OTP sent to your email. It will expire in 10 minutes.",

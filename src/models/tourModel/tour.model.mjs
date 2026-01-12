@@ -54,6 +54,44 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       defaultValue: "active",
     },
+    // Twilio call tracking fields
+    callSid: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    agentCallStatus: {
+      type: DataTypes.ENUM("pending", "ringing", "answered", "no-answer", "voicemail"),
+      allowNull: true,
+    },
+    agentCallTime: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    resolutionStatus: {
+      type: DataTypes.ENUM("unresolved", "resolved", "pending"),
+      defaultValue: "pending",
+    },
+    voicemailLeft: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    scheduledCallTime: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    // Buyer confirmation call tracking fields
+    buyerCallSid: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    buyerCallStatus: {
+      type: DataTypes.ENUM("pending", "ringing", "answered", "no-answer", "voicemail"),
+      allowNull: true,
+    },
+    buyerCallTime: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   });
 
   return TourRequest;

@@ -5,12 +5,14 @@ import AgentModel from "./agent.model.mjs";
 import CreatorModel from "./creator.model.mjs";
 import NotificationPreferenceModel from "./notification-preference.model.mjs";
 import { Post, setupAssociations } from "../postModel/index.mjs";
+import LeadPaymentModel from "../leadPaymentModel/leadPayment.model.mjs";
 
 const User = UserModel(sequelize);
 const PaymentDetails = PaymentDetailsModel(sequelize);
 const AgentTable = AgentModel(sequelize);
 const CreatorTable = CreatorModel(sequelize);
 const NotificationPreferenceTable = NotificationPreferenceModel(sequelize);
+const LeadPayment = LeadPaymentModel(sequelize);
 
 User.hasMany(PaymentDetails, {
   foreignKey: "userId",
@@ -63,4 +65,5 @@ export {
   CreatorTable,
   NotificationPreferenceTable,
   Post,
+  LeadPayment,
 };

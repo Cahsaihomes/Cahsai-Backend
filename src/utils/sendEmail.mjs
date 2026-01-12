@@ -21,18 +21,35 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS,
   },
 });
-export default async function sendEmail(to, otp) {
+
+/**
+ * Send email with support for both HTML and plain text
+ * @param {string} to - Recipient email address
+ * @param {string} htmlContent - HTML content or plain text
+ * @param {string} subject - Email subject line
+ * @param {boolean} isHtml - Whether content is HTML (default: true if contains HTML tags)
+ */
+export default async function sendEmail(to, htmlContent, subject = "Notification", isHtml = true) {
   try {
-    await transporter.sendMail({
-      from: `Auth System <${process.env.EMAIL_USER}>`, // :white_check_mark: ALWAYS GMAIL
-      to, // can be yopmail, gmail, anything
-      subject: "OTP Verification",
-      text: `Your OTP is: ${otp}`,
-    });
+    // Detect if content is HTML
+    const contentIsHtml = isHtml || (typeof htmlContent === 'string' && htmlContent.includes('<'));
+    
+    const mailOptions = {
+      from: `CAHSAI <${process.env.EMAIL_USER}>`,
+      to,
+      subject: subject || "Notification",
+      ...(contentIsHtml 
+        ? { html: htmlContent }
+        : { text: htmlContent }
+      ),
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Email sent to ${to} with subject: ${subject}`);
+    return true;
   } catch (error) {
-    console.error("Email sending failed:", error.message);
+    console.error("❌ Email sending failed:", error.message);
     // Do NOT crash backend
     return false;
   }
-  return true;
 }

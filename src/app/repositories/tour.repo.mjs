@@ -4,12 +4,28 @@ import {
   Post,
   User,
   TourRejection,
+  MlsProperty,
 } from "../../models/tourModel/index.mjs";
 import { BuyerReviewPost } from "../../models/buyerReviewPostModel/index.mjs";
 
 const tourRepo = {
   createTourRequest: async (data) => {
-    return await TourRequest.create({ ...data, bookingStatus: "pending" });
+    console.log(`\n✍️  Creating new tour request:`, {
+      agentId: data.agentId,
+      buyerId: data.buyerId,
+      postId: data.postId,
+      date: data.date,
+      time: data.time
+    });
+    const newTour = await TourRequest.create({ ...data, bookingStatus: "pending" });
+    console.log(`   ✅ New tour created with ID: ${newTour.id}\n`);
+    return newTour;
+  },
+
+  updateTourRequest: async (tourId, updateData) => {
+    const tour = await TourRequest.findByPk(tourId);
+    if (!tour) throw new Error(`Tour with ID ${tourId} not found`);
+    return await tour.update(updateData);
   },
 
   // Get tours by expiredStatus
@@ -45,10 +61,17 @@ const tourRepo = {
 
     const tours = await TourRequest.findAll({
       where: whereClause,
+      attributes: [
+        'id', 'postId', 'buyerId', 'agentId', 'date', 'time', 'status', 'bookingStatus', 
+        'activeLead', 'timerExpiresAt', 'expiredStatus', 'callSid', 'agentCallStatus', 
+        'agentCallTime', 'resolutionStatus', 'voicemailLeft', 'scheduledCallTime', 
+        'buyerCallSid', 'buyerCallStatus', 'buyerCallTime', 'createdAt', 'updatedAt'
+      ],
       include: [
         {
           model: Post,
           as: "post",
+          required: false,
           attributes: {
             exclude: ["createdAt", "updatedAt"], // optional
           },
@@ -134,18 +157,102 @@ const tourRepo = {
         const tourJson = tour.toJSON();
         const post = tourJson.post || {};
 
+        // If no post found, try to fetch from MlsProperty table by postId (which is listingId for MLS)
+        let mlsProperty = null;
+        if (!post.id) {
+          // Try to find MlsProperty by postId as listingId first
+          mlsProperty = await MlsProperty.findOne({
+            where: { listingId: tourJson.postId },
+            attributes: [
+              "id",
+              "listingId",
+              "streetNumber",
+              "streetName",
+              "city",
+              "state",
+              "postalCode",
+              "county",
+              "bedrooms",
+              "bathroomsFull",
+              "bathroomsHalf",
+              "listPrice",
+              "closePrice",
+              "propertyType",
+              "propertySubType",
+              "photosCount",
+              "livingAreaSqFt",
+              "yearBuilt",
+              "publicRemarks",
+              "latitude",
+              "longitude",
+            ]
+          });
+          
+          // If not found by listingId, try by id (in case postId is numeric)
+          if (!mlsProperty && !isNaN(tourJson.postId)) {
+            mlsProperty = await MlsProperty.findByPk(tourJson.postId, {
+              attributes: [
+                "id",
+                "listingId",
+                "streetNumber",
+                "streetName",
+                "city",
+                "state",
+                "postalCode",
+                "county",
+                "bedrooms",
+                "bathroomsFull",
+                "bathroomsHalf",
+                "listPrice",
+                "closePrice",
+                "propertyType",
+                "propertySubType",
+                "photosCount",
+                "livingAreaSqFt",
+                "yearBuilt",
+                "publicRemarks",
+                "latitude",
+                "longitude",
+              ]
+            });
+          }
+        }
+
+        // Normalize data: create a unified post object from either Post or MlsProperty
+        const normalizedPost = post.id ? post : mlsProperty ? {
+          id: mlsProperty.id,
+          title: `${mlsProperty.streetNumber || ''} ${mlsProperty.streetName || ''}`.trim() || 'Property',
+          price: mlsProperty.listPrice,
+          zipCode: mlsProperty.postalCode,
+          city: mlsProperty.city,
+          state: mlsProperty.state,
+          location: [mlsProperty.city, mlsProperty.state].filter(Boolean).join(', ') || 'Location',
+          description: mlsProperty.publicRemarks,
+          bedrooms: mlsProperty.bedrooms,
+          bathrooms: mlsProperty.bathroomsFull,
+          propertyType: mlsProperty.propertyType,
+          listingId: mlsProperty.listingId,
+          latitude: mlsProperty.latitude,
+          longitude: mlsProperty.longitude,
+          livingAreaSqFt: mlsProperty.livingAreaSqFt,
+          yearBuilt: mlsProperty.yearBuilt,
+          photosCount: mlsProperty.photosCount,
+        } : {};
+
         // --- Reviews for this post ---
         let reviewCount = 0;
         let ratingCount = 0;
         let views = 0;
-        if (post.id) {
+        const postId = post.id || mlsProperty?.id;
+        
+        if (postId) {
           reviewCount = await BuyerReviewPost.count({
-            where: { postId: post.id },
+            where: { postId: postId },
           });
 
           const avgRatingResult = await BuyerReviewPost.findOne({
             attributes: [[fn("AVG", col("rating")), "avgRating"]],
-            where: { postId: post.id },
+            where: { postId: postId },
             raw: true,
           });
 
@@ -156,13 +263,13 @@ const tourRepo = {
           }
           // Get views from PostStats
           const { PostStats } = await import("../../models/postModel/index.mjs");
-          views = await PostStats.sum("views", { where: { postId: post.id } });
+          views = await PostStats.sum("views", { where: { postId: postId } }) || 0;
         }
 
         return {
           ...tourJson,
           post: {
-            ...post,
+            ...normalizedPost,
             tags: safeList(post?.tags),
             homeStyle: safeList(post?.homeStyle),
             amenities: safeList(post?.amenities),
@@ -174,6 +281,9 @@ const tourRepo = {
         };
       })
     );
+
+    console.log(`   ✅ Fetched ${formattedTours.length} tours from database`);
+    return formattedTours;
   },
 
   getPaginatedTours: async (page = 1, limit = 10) => {
@@ -206,7 +316,14 @@ const tourRepo = {
     return deletedCount;
   },
   updateActiveLeadById: async (tourId) => {
-    return await TourRequest.update(
+    console.log(`\n💾 UPDATE TOUR IN DATABASE`);
+    console.log(`   Tour ID: ${tourId}`);
+    console.log(`   Setting:`);
+    console.log(`     - activeLead: true`);
+    console.log(`     - status: "Confirmed Claimed"`);
+    console.log(`     - bookingStatus: "active"`);
+    
+    const result = await TourRequest.update(
       {
         activeLead: true,
         status: "Confirmed Claimed",
@@ -214,6 +331,9 @@ const tourRepo = {
       },
       { where: { id: tourId } }
     );
+
+    console.log(`   Database update result:`, result);
+    return result;
   },
   createTourRejection: async (data) => {
     return await TourRejection.create(data);
@@ -274,6 +394,12 @@ const tourRepo = {
     return await TourRequest.update(
       { bookingStatus },
       { where: { id: tourId } }
+    );
+  },
+  updateLeadWithPayment: async (tourId, paymentData, options = {}) => {
+    return await TourRequest.update(
+      paymentData,
+      { where: { id: tourId }, ...options }
     );
   },
 };

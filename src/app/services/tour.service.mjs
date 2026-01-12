@@ -1,5 +1,6 @@
-import { TourRejection, TourRequest, Post, User } from "../../models/tourModel/index.mjs";
+import { TourRejection, TourRequest, Post, User, MlsProperty } from "../../models/tourModel/index.mjs";
 import tourRepo from "../repositories/tour.repo.mjs";
+import { scheduleTourFollowup, cancelTourFollowup } from "./tourScheduler.service.mjs";
 import {
   startOfDay,
   endOfDay,
@@ -12,15 +13,34 @@ import {
 export const createTour = async (buyerId, tourData) => {
   const { date, time, postId, agentId } = tourData;
 
+  // Helper function to find post from either posts or mlsProperty table
+  const findPost = async (id) => {
+    // First, try to find in posts table by id
+    const post = await Post.findByPk(id);
+    if (post) {
+      return post;
+    }
+
+    // If not found, try mlsProperty table by listingId
+    const mlsProperty = await MlsProperty.findOne({
+      where: { listingId: id }
+    });
+    if (mlsProperty) {
+      return mlsProperty;
+    }
+
+    return null;
+  };
+
   // Validate referenced rows exist to avoid FK violations
   const [post, agent, buyer] = await Promise.all([
-    Post.findByPk(postId),
+    findPost(postId),
     User.findByPk(agentId),
     User.findByPk(buyerId),
   ]);
 
   if (!post) {
-    return { status: "error", code: 404, message: "Post not found" };
+    return { status: "error", code: 404, message: "Post not found in posts or mlsProperty tables" };
   }
   if (!agent || agent.role !== "agent") {
     return { status: "error", code: 400, message: "Invalid agent" };
@@ -39,6 +59,7 @@ export const createTour = async (buyerId, tourData) => {
 
   const existingTour = await TourRequest.findOne({
     where: { buyerId, date, time, bookingStatus: "pending" },
+    attributes: ['id', 'buyerId', 'agentId', 'date', 'time', 'bookingStatus'],
   });
 
   if (existingTour) {
@@ -52,6 +73,15 @@ export const createTour = async (buyerId, tourData) => {
 
   try {
     const newTour = await tourRepo.createTourRequest(payload);
+    
+    // Schedule automatic agent call after 2 minutes if no response
+    try {
+      scheduleTourFollowup(newTour.id, agentId);
+    } catch (scheduleError) {
+      console.error("Error scheduling tour followup:", scheduleError);
+      // Continue even if scheduling fails, as the tour was created successfully
+    }
+    
     return {
       status: "success",
       code: 200,
@@ -59,14 +89,24 @@ export const createTour = async (buyerId, tourData) => {
       data: newTour,
     };
   } catch (err) {
+    // Log all error details for debugging
+    console.error("createTour error details:", {
+      name: err?.name,
+      message: err?.message,
+      parent: err?.parent?.message,
+      code: err?.parent?.code,
+      sql: err?.sql,
+    });
+
     // Handle FK violations gracefully
     const fkErrorNames = [
       "SequelizeForeignKeyConstraintError",
-      "SequelizeDatabaseError",
     ];
+    const fkErrorCodes = ["ER_NO_REFERENCED_ROW_2", "ER_NO_REFERENCED_ROW"];
+    
     if (
       fkErrorNames.includes(err?.name) ||
-      err?.parent?.code === "ER_NO_REFERENCED_ROW_2"
+      (err?.parent && fkErrorCodes.includes(err?.parent?.code))
     ) {
       return {
         status: "error",
@@ -75,8 +115,14 @@ export const createTour = async (buyerId, tourData) => {
           "Invalid reference provided (postId/agentId/buyerId). Please verify IDs.",
       };
     }
-    // Unknown error -> bubble up details to controller logging, but avoid 500 leak
-    console.error("createTour unexpected error:", err);
+
+    // For other database errors, log and return generic error
+    return {
+      status: "error",
+      code: 500,
+      message: "Unable to create tour at this time: " + (err?.message || "Unknown error"),
+    };
+    console.error("Full error:", err);
     return {
       status: "error",
       code: 500,
@@ -120,6 +166,9 @@ export const deleteTour = async (tourId) => {
   };
 };
 export const claimTour = async (tourId) => {
+  // Cancel the scheduled followup call when agent claims the tour
+  cancelTourFollowup(tourId);
+  
   const [updatedCount] = await tourRepo.updateActiveLeadById(tourId);
 
   if (updatedCount === 0) {
@@ -233,4 +282,22 @@ export const getTourStatus = async (tourId) => {
     createdAt: tour.createdAt,
     timeLeft,
   };
+};
+
+export const getToursByDateRange = async (whereClause, options = {}) => {
+  try {
+    const result = await TourRequest.findAndCountAll({
+      where: whereClause,
+      include: [
+        { model: Post, as: "post" },
+        { model: User, as: "buyer" },
+        { model: User, as: "agent" },
+      ],
+      ...options,
+    });
+    return result;
+  } catch (error) {
+    console.error("Error fetching tours by date range:", error);
+    throw error;
+  }
 };

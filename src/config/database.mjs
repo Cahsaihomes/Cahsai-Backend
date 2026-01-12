@@ -10,13 +10,28 @@ const sequelize = new Sequelize(
     host: config.DB_HOST,
     port: config.DB_PORT ? Number(config.DB_PORT) : 3306,
     dialect: config.DB_DIALECT,
-    pool: {
-      max: 50,
-      min: 5,
-      acquire: 60000,
-      idle: 10000
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
     },
-    logging: false
+    pool: {
+      max: 10,
+      min: 2,
+      acquire: 120000,
+      idle: 30000,
+      evict: 60000
+    },
+    connectTimeout: 120000,
+    requestTimeout: 120000,
+    timezone: '+00:00',
+    logging: false,
+    retry: {
+      max: 5,
+      timeout: 10000,
+      match: [/ETIMEDOUT/, /EHOSTUNREACH/, /ECONNREFUSED/, /ENOTFOUND/]
+    }
   }
 );
 

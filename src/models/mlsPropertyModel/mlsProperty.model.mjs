@@ -61,6 +61,10 @@ export default (sequelize) => {
       // Features & agent as JSON to preserve original arrays/objects
       features: { type: DataTypes.JSON, allowNull: true },
       agent: { type: DataTypes.JSON, allowNull: true },
+      agentId: {
+        type: DataTypes.STRING,
+        allowNull: true
+      }
     },
     {
       tableName: "MlsProperties",

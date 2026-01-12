@@ -1,2 +1,15 @@
 node_modules
-.env
+# .env
+# .env.local
+# .env.development.local
+# .env.test.local
+# .env.production.local
+# .DS_Store
+# coverage
+# dist
+# npm-debug.log*
+# yarn-debug.log*
+# yarn-error.log*
+# pnpm-debug.log*
+# check-db.mjs
+# run-migration.mjs

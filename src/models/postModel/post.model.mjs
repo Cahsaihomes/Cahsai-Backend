@@ -39,11 +39,9 @@ export default (sequelize) => {
     bedrooms: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      allowNull: true,
     },
     bathrooms: {
       type: DataTypes.INTEGER,
-      allowNull: true,
       allowNull: true,
     },
     tags: {
@@ -174,7 +172,7 @@ export default (sequelize) => {
     publishToWatchHomes: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
-      allowNull: false,
+      allowNull: true,
     },
     postType: {
       type: DataTypes.STRING,

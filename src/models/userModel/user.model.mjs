@@ -41,7 +41,7 @@ export default (sequelize) => {
       emailVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
       isDeleted: { type: DataTypes.BOOLEAN, defaultValue: false },
       stripeAccountId: { type: DataTypes.STRING, allowNull: true },
-      isRentalCompany: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false },
+      isRentalCompany: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: true },
     },
     {
       tableName: "users",

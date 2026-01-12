@@ -21,6 +21,12 @@ export const createTourRequest = async (req, res) => {
     const buyerId = req.user.id;
     const result = await tourService.createTour(buyerId, req.body);
 
+    if (result.status === "success") {
+      console.log(`✅ Tour request created successfully. Tour ID: ${result.data.id}`);
+      console.log(`📞 Initiating buyer confirmation call for tour ${result.data.id}`);
+      console.log(`⏰ Agent call scheduled for 2 minutes after buyer confirmation`);
+    }
+
     return res.status(result.code).json(result);
   } catch (err) {
     console.error("Error in createTourRequest:", err);
@@ -196,6 +202,80 @@ export const getTours = async (req, res) => {
     }
   };
 
+  /**
+   * GET /api/tours/leads/:agentId
+   * Shows tour requests for a specific agent by agent ID
+   * Shows tours to posting agent for 15 minutes, then to other agents in same zipcode/location
+   */
+  export const getTourLeadsByAgentId = async (req, res) => {
+    try {
+      const { agentId } = req.params;
+      const requestingAgentId = req.user.id;
+      const agentZipcode = req.user.zipcode;
+      const agentLocation = req.user.locationArea;
+
+      // Validate agentId
+      if (!agentId || isNaN(agentId)) {
+        return res.status(400).json({ status: "error", message: "Valid agentId is required" });
+      }
+
+      // Pagination from query params
+      let page = parseInt(req.query.page) || 1;
+      let limit = parseInt(req.query.limit) || 20;
+      // Pass pagination to repo via globalThis
+      globalThis.__TOUR_LEADS_PAGE = page;
+      globalThis.__TOUR_LEADS_LIMIT = limit;
+      // Get all tour requests with post and agent details
+      const allTours = await tourService.getAllToursWithDetails();
+      // Reset global vars to avoid side effects
+      delete globalThis.__TOUR_LEADS_PAGE;
+      delete globalThis.__TOUR_LEADS_LIMIT;
+
+      const now = new Date();
+      // Filter tours based on time and agent
+      const filteredTours = allTours.filter(tour => {
+        const created = new Date(tour.createdAt);
+        const minutesSince = (now - created) / (1000 * 60);
+
+        // Only show leads for the specified agent - compare as strings for safety
+        const tourAgentId = String(tour.agent?.id);
+        const targetAgentId = String(agentId);
+        
+        if (tourAgentId !== targetAgentId) {
+          return false;
+        }
+
+        // If requesting agent is the posting agent, show all their leads
+        if (requestingAgentId === parseInt(agentId)) {
+          return true;
+        }
+
+        // If requesting agent is NOT the posting agent
+        // Show leads only after 15 minutes and if in same zipcode/location
+        if (minutesSince > 15) {
+          // Get zipcode and location from either post or normalized data
+          const postZipcode = tour.post?.zipCode || tour.post?.zipcode;
+          const postLocation = tour.post?.location || tour.post?.locationArea;
+          
+          if (
+            tour.post &&
+            postZipcode === agentZipcode &&
+            postLocation === agentLocation
+          ) {
+            return true;
+          }
+        }
+
+        return false;
+      }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      return res.status(200).json({ status: "success", leads: filteredTours, agentId, page, limit });
+    } catch (err) {
+      console.error("Error in getTourLeadsByAgentId:", err);
+      return res.status(500).json({ status: "error", message: "Internal Server Error" });
+    }
+  };
+
 export const getAgentToursDay = async (req, res) => {
   try {
     const { date } = req.query;
@@ -265,6 +345,82 @@ export const getAgentToursMonth = async (req, res) => {
   }
 };
 
+export const getAgentToursDayByAgentId = async (req, res) => {
+  try {
+    const { agentId } = req.params;
+    const { date } = req.query;
+
+    // Validate agentId
+    if (!agentId || isNaN(agentId)) {
+      return res.status(400).json({ status: "error", message: "Valid agentId is required" });
+    }
+
+    if (!date) {
+      return res.status(400).json({ status: "error", message: "date is required" });
+    }
+
+    const result = await tourService.getAgentToursByDay(parseInt(agentId), date);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("Error in getAgentToursDayByAgentId:", err);
+    res.status(500).json({ status: "error", message: err.message });
+  }
+};
+
+export const getAgentToursWeekByAgentId = async (req, res) => {
+  try {
+    const { agentId } = req.params;
+    const { startDate, endDate } = req.query;
+
+    // Validate agentId
+    if (!agentId || isNaN(agentId)) {
+      return res.status(400).json({ status: "error", message: "Valid agentId is required" });
+    }
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        status: "error",
+        message: "startDate and endDate are required",
+      });
+    }
+
+    const result = await tourService.getAgentToursByWeek(
+      parseInt(agentId),
+      startDate,
+      endDate
+    );
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("Error in getAgentToursWeekByAgentId:", err);
+    res.status(500).json({ status: "error", message: err.message });
+  }
+};
+
+export const getAgentToursMonthByAgentId = async (req, res) => {
+  try {
+    const { agentId } = req.params;
+    const { month, year } = req.query;
+
+    // Validate agentId
+    if (!agentId || isNaN(agentId)) {
+      return res.status(400).json({ status: "error", message: "Valid agentId is required" });
+    }
+
+    if (!month || !year) {
+      return res.status(400).json({
+        status: "error",
+        message: "month and year are required",
+      });
+    }
+
+    const result = await tourService.getAgentToursByMonth(parseInt(agentId), month, year);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("Error in getAgentToursMonthByAgentId:", err);
+    res.status(500).json({ status: "error", message: err.message });
+  }
+};
+
 export const updateTourStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -317,5 +473,89 @@ export const getTourStatus = async (req, res) => {
   } catch (err) {
     console.error("Error in getTourStatus:", err);
     return res.status(500).json({ status: "error", message: "Internal Server Error" });
+  }
+};
+
+/**
+ * GET /api/tours/leads-by-date
+ * Get all leads filtered by date and time range
+ * Query params: startDate, endDate, startTime, endTime
+ */
+export const getLeadsByDateAndTime = async (req, res) => {
+  try {
+    const { startDate, endDate, startTime, endTime, page = 1, limit = 20 } = req.query;
+
+    // Validate required parameters
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        status: "error",
+        message: "startDate and endDate are required (format: YYYY-MM-DD)",
+      });
+    }
+
+    // Parse dates
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Validate dates
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid date format. Use YYYY-MM-DD",
+      });
+    }
+
+    // Set end date to end of day
+    end.setHours(23, 59, 59, 999);
+
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+
+    // Build where clause
+    const whereClause = {
+      createdAt: {
+        [require("sequelize").Op.between]: [start, end],
+      },
+    };
+
+    // If time filters are provided, add time comparison
+    if (startTime || endTime) {
+      // This would require a more complex query with TIME formatting
+      console.log("⏰ Time filtering requested:", { startTime, endTime });
+    }
+
+    // Fetch leads with pagination
+    const { count, rows } = await tourService.getToursByDateRange(
+      whereClause,
+      {
+        limit: parseInt(limit),
+        offset,
+        order: [["createdAt", "DESC"]],
+      }
+    );
+
+    const totalPages = Math.ceil(count / parseInt(limit));
+
+    return res.status(200).json({
+      status: "success",
+      data: rows,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: count,
+        pages: totalPages,
+      },
+      filters: {
+        startDate,
+        endDate,
+        startTime: startTime || null,
+        endTime: endTime || null,
+      },
+    });
+  } catch (err) {
+    console.error("Error in getLeadsByDateAndTime:", err);
+    return res.status(500).json({
+      status: "error",
+      message: "Internal Server Error",
+    });
   }
 };

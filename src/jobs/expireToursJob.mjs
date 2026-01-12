@@ -52,6 +52,24 @@ cron.schedule("*/5 * * * *", async () => {
       expiredStatus: "active",
       status: { [Op.ne]: "confirmed" },
     },
+    attributes: [
+      "id",
+      "postId",
+      "buyerId",
+      "agentId",
+      "date",
+      "time",
+      "status",
+      "bookingStatus",
+      "activeLead",
+      "timerExpiresAt",
+      "expiredStatus",
+      "createdAt",
+      "updatedAt",
+    ],
+  }).catch(error => {
+    console.error("❌ Error fetching pending tours:", error.message);
+    return [];
   });
 
   for (const tour of pendingTours) {

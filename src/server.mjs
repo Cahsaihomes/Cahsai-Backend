@@ -5,15 +5,12 @@ import config from "./config/config.mjs";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import setupSocket from "./socket/index.mjs"; 
-
 (async () => {
   try {
     await sequelize.authenticate();
     console.log("✅ Database connected");
-
-    // Sync database schema with alter: true
-    await sequelize.sync({ alter: true });
-    
+    await sequelize.sync({ alter: false });
+    console.log("✅ Database synchronized");
     const httpServer = createServer(app);
 
     // Setup socket.io

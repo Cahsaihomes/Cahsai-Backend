@@ -205,6 +205,130 @@ export const welcomeEmailTemplate = (firstName) => {
   `;
 };
 
+// Admin Account Created Email Template
+export const adminAccountCreatedTemplate = (firstName, lastName, email, password, role) => {
+  return `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto;">
+      <!-- Header -->
+      <div style="background: linear-gradient(135deg, ${COLORS.PRIMARY} 0%, ${COLORS.HOVER} 100%); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="color: ${COLORS.WHITE}; margin: 0; font-size: 28px;">🎉 Welcome to CAHSAI Admin Panel</h1>
+      </div>
+
+      <!-- Body -->
+      <div style="background-color: ${COLORS.LIGHT_BG}; padding: 40px; border-radius: 0 0 8px 8px;">
+        <p style="color: ${COLORS.TEXT}; font-size: 16px; margin-bottom: 20px;">
+          Hello <strong>${firstName} ${lastName}</strong>,
+        </p>
+
+        <p style="color: ${COLORS.SECONDARY_TEXT}; font-size: 15px; line-height: 1.6; margin-bottom: 30px;">
+          Your admin account has been successfully created! You now have access to the CAHSAI Admin Panel.
+        </p>
+
+        <h3 style="color: ${COLORS.PRIMARY}; font-size: 18px; margin-bottom: 15px;">Your Login Credentials</h3>
+
+        <!-- Credentials Box -->
+        <div style="background-color: ${COLORS.WHITE}; padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid ${COLORS.PRIMARY};">
+          <p style="color: ${COLORS.TEXT}; margin: 12px 0;">
+            <strong>Email:</strong><br>
+            <span style="font-family: 'Courier New', monospace; background: #f5f5f5; padding: 8px 12px; border-radius: 4px; display: inline-block;">${email}</span>
+          </p>
+          <p style="color: ${COLORS.TEXT}; margin: 12px 0;">
+            <strong>Password:</strong><br>
+            <span style="font-family: 'Courier New', monospace; background: #f5f5f5; padding: 8px 12px; border-radius: 4px; display: inline-block;">${password}</span>
+          </p>
+          <p style="color: ${COLORS.TEXT}; margin: 12px 0;">
+            <strong>Role:</strong><br>
+            <span style="font-family: 'Courier New', monospace; background: #f5f5f5; padding: 8px 12px; border-radius: 4px; display: inline-block;">${role}</span>
+          </p>
+        </div>
+
+        <!-- Security Warning -->
+        <div style="background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin-bottom: 30px; border-radius: 4px;">
+          <p style="color: #856404; margin: 0; font-size: 13px;">
+            <strong>⚠️ Important Security Notice:</strong>
+            <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+              <li>Please change your password immediately after first login</li>
+              <li>Do not share your credentials with anyone</li>
+              <li>Keep your password confidential</li>
+              <li>Enable two-factor authentication if available</li>
+            </ul>
+          </p>
+        </div>
+
+        <!-- CTA Button -->
+        <div style="text-align: center; margin-bottom: 30px;">
+          <a href="https://admin.cahsai.com/login" style="background: linear-gradient(135deg, ${COLORS.PRIMARY} 0%, ${COLORS.HOVER} 100%); color: ${COLORS.WHITE}; padding: 15px 40px; text-decoration: none; border-radius: 50px; font-size: 16px; font-weight: bold; display: inline-block;">
+            Log In to Admin Panel
+          </a>
+        </div>
+
+        <p style="color: ${COLORS.SECONDARY_TEXT}; font-size: 13px;">
+          If you did not request this account or have any questions, please contact your administrator immediately.
+        </p>
+
+        <!-- Footer -->
+        <div style="border-top: 1px solid ${COLORS.BORDER}; padding-top: 20px; text-align: center;">
+          <p style="color: ${COLORS.SECONDARY_TEXT}; font-size: 12px; margin: 0;">
+            © 2026 CAHSAI. All rights reserved.<br>
+            If you have questions, contact us at <a href="mailto:support@cahsai.com" style="color: ${COLORS.PRIMARY}; text-decoration: none;">support@cahsai.com</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  `;
+};
+
+// Admin Account Deleted Email Template
+export const adminAccountDeletedTemplate = (firstName, lastName) => {
+  return `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto;">
+      <!-- Header -->
+      <div style="background: linear-gradient(135deg, ${COLORS.PRIMARY} 0%, ${COLORS.HOVER} 100%); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="color: ${COLORS.WHITE}; margin: 0; font-size: 24px;">ℹ️ Account Status Update</h1>
+      </div>
+
+      <!-- Body -->
+      <div style="background-color: ${COLORS.LIGHT_BG}; padding: 40px; border-radius: 0 0 8px 8px;">
+        <p style="color: ${COLORS.TEXT}; font-size: 16px; margin-bottom: 20px;">
+          Hello <strong>${firstName} ${lastName}</strong>,
+        </p>
+
+        <p style="color: ${COLORS.SECONDARY_TEXT}; font-size: 15px; line-height: 1.6; margin-bottom: 30px;">
+          This is to inform you that your admin account has been permanently deleted from the CAHSAI system.
+        </p>
+
+        <!-- Details Box -->
+        <div style="background-color: ${COLORS.WHITE}; padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #ff6b6b;">
+          <p style="color: ${COLORS.TEXT}; margin: 0;">
+            <strong>Deletion Date:</strong><br>
+            <span style="font-family: 'Courier New', monospace; background: #f5f5f5; padding: 8px 12px; border-radius: 4px; display: inline-block; margin-top: 5px;">${new Date().toLocaleString()}</span>
+          </p>
+        </div>
+
+        <!-- What This Means -->
+        <h3 style="color: ${COLORS.PRIMARY}; font-size: 16px; margin-bottom: 15px;">What This Means:</h3>
+        <ul style="color: ${COLORS.SECONDARY_TEXT}; line-height: 1.8; margin: 15px 0; padding-left: 20px;">
+          <li>You will no longer have access to the Admin Panel</li>
+          <li>All associated admin privileges have been revoked</li>
+          <li>Your data has been securely removed from our systems</li>
+        </ul>
+
+        <p style="color: ${COLORS.SECONDARY_TEXT}; font-size: 14px; line-height: 1.6; margin-top: 30px;">
+          If you believe this is a mistake or need further assistance, please contact your administrator as soon as possible.
+        </p>
+
+        <!-- Footer -->
+        <div style="border-top: 1px solid ${COLORS.BORDER}; padding-top: 20px; text-align: center;">
+          <p style="color: ${COLORS.SECONDARY_TEXT}; font-size: 12px; margin: 0;">
+            © 2026 CAHSAI. All rights reserved.<br>
+            If you have questions, contact us at <a href="mailto:support@cahsai.com" style="color: ${COLORS.PRIMARY}; text-decoration: none;">support@cahsai.com</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  `;
+};
+
 // Generic Notification Email Template
 export const notificationEmailTemplate = (title, userName, message, details = []) => {
   return `

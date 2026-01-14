@@ -5,6 +5,7 @@ import {
   NotificationPreferenceTable,
   User,
 } from "../../models/userModel/index.mjs";
+import { Role, UserRole } from "../../models/roleModel/index.mjs";
 import {
   agentSchema,
   bankDetailsSchema,
@@ -246,6 +247,21 @@ export const loginUser = async ({ email, password }) => {
       "isDeleted",
       "avatarUrl",
       "isRentalCompany",
+      "is_admin",
+    ],
+    include: [
+      {
+        model: UserRole,
+        as: "userRoles",
+        attributes: ["id", "roleId"],
+        include: [
+          {
+            model: Role,
+            as: "role",
+            attributes: ["id", "name", "description", "permissions"],
+          },
+        ],
+      },
     ],
   });
 
@@ -254,7 +270,7 @@ export const loginUser = async ({ email, password }) => {
   if (!user.emailVerified) {
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
     console.log("Generated OTP:", otp); // For debugging purposes
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // in 10  minutes
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // in 10 minutes
     await user.update({ otp, otpExpiry });
     const userData = user.toJSON();
     delete userData.password;
@@ -278,8 +294,23 @@ export const loginUser = async ({ email, password }) => {
   if (!isMatch)
     return { status: "error", message: "Invalid email or password" };
 
+  // Get specific role from user table if admin
+  let userRole = user.role; // Will be finance_admin, creator_admin, moderator_admin, or admin
+  let adminRole = null;
+  
+  if (user.is_admin && user.userRoles && user.userRoles.length > 0) {
+    adminRole = user.userRoles[0]?.role?.name || null; // super_admin, finance, creator, content_moderator
+  }
+
   const token = jwt.sign(
-    { id: user.id, email: user.email, role: user.role, isRentalCompany: user.isRentalCompany },
+    { 
+      id: user.id, 
+      email: user.email, 
+      role: userRole, // finance_admin, creator_admin, moderator_admin, admin, buyer, agent, etc
+      adminRole: adminRole, // Specific role name (super_admin, finance, creator, content_moderator)
+      is_admin: user.is_admin,
+      isRentalCompany: user.isRentalCompany 
+    },
     process.env.JWT_SECRET,
     { expiresIn: "1d" }
   );
@@ -343,6 +374,7 @@ export const loginUser = async ({ email, password }) => {
 };
 
 export const verifyOtp = async ({ email, otp }) => {
+  
   if (!email || !otp) {
     return { status: "error", message: "Email and OTP are required" };
   }
@@ -386,6 +418,7 @@ export const requestOTP = async (email) => {
     return { status: "error", message: "User not found" };
   }
   const otp = Math.floor(1000 + Math.random() * 9000).toString();
+  console.log("Generated OTP for password reset:", otp); // For debugging purposes
   const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
   await user.update({ otp, otpExpiry });
   

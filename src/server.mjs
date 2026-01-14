@@ -4,13 +4,18 @@ import { sequelize } from "./models/userModel/index.mjs";
 import config from "./config/config.mjs";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import setupSocket from "./socket/index.mjs"; 
+import setupSocket from "./socket/index.mjs";
+import { initializeDefaultRoles } from "./utils/initializeRoles.mjs";
 (async () => {
   try {
     await sequelize.authenticate();
-    console.log("✅ Database connected");
+    console.log("✅ Database connected"); 
     await sequelize.sync({ alter: false });
     console.log("✅ Database synchronized");
+    
+    // Initialize default roles
+    await initializeDefaultRoles();
+    
     const httpServer = createServer(app);
 
     // Setup socket.io
@@ -21,8 +26,7 @@ import setupSocket from "./socket/index.mjs";
       "http://localhost:3000",
       "http://localhost:3001",
       "http://localhost:5000",
-      "https://cahsai-frontend-production.up.railway.app",
-      "https://www.cahsai.com"
+      "https://cahsai-frontend-production.up.railway.app"
     ];
     const io = new Server(httpServer, {
       cors: {

@@ -112,6 +112,7 @@ export const createPost = async (req, res) => {
         publishToWatchHomes: req.body.publishToWatchHomes || false,
         postType: req.body.postType || null,
         linkedPostId: req.body.linkedPostId || null,
+        productLink: req.body.productLink || null,
       },
       req.user.id
     );
@@ -273,6 +274,7 @@ export const updatePost = async (req, res) => {
     if (req.body.publishToWatchHomes !== undefined) updateData.publishToWatchHomes = req.body.publishToWatchHomes;
     if (req.body.postType) updateData.postType = req.body.postType;
     if (req.body.linkedPostId) updateData.linkedPostId = req.body.linkedPostId;
+    if (req.body.productLink) updateData.productLink = req.body.productLink;
     if (req.body.features) {
       try {
         updateData.features = JSON.parse(req.body.features);

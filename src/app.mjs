@@ -20,6 +20,7 @@ import adminDashboardRoutes from "./routes/adminDashboard.routes.mjs";
 import rakutenRoutes from "./routes/rakuten.routes.mjs"
 import propertyRoutes from "./routes/properties.routes.mjs";
 import rentalApplicationRoutes from "./routes/rentalApplication.routes.mjs"
+import adminRoutes from "./routes/admin.routes.mjs";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
@@ -29,7 +30,7 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: ["https://cahsai-one.vercel.app","https://cahsai-nine.vercel.app", "http://localhost:3000","http://localhost:3001", "https://cahsai-frontend-production.up.railway.app","https://cahsai-frontend-production.up.railway.app","https://www.cahsai.com"],
+    origin: ["https://cahsai-one.vercel.app","https://cahsai-nine.vercel.app", "http://localhost:3000","http://localhost:3001", "https://cahsai-frontend-production.up.railway.app","https://cahsai-frontend-production.up.railway.app"],
     credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: [
@@ -65,6 +66,7 @@ app.use("/api/admin-dashboard", adminDashboardRoutes);
 app.use("/api/rakuten", rakutenRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/rental-applications", rentalApplicationRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.use(errorHandler);
 

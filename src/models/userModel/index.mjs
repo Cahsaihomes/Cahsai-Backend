@@ -6,6 +6,8 @@ import CreatorModel from "./creator.model.mjs";
 import NotificationPreferenceModel from "./notification-preference.model.mjs";
 import { Post, setupAssociations } from "../postModel/index.mjs";
 import LeadPaymentModel from "../leadPaymentModel/leadPayment.model.mjs";
+import { DataTypes } from "sequelize";
+import UserRoleModel from "../roleModel/userRole.model.mjs";
 
 const User = UserModel(sequelize);
 const PaymentDetails = PaymentDetailsModel(sequelize);
@@ -13,6 +15,7 @@ const AgentTable = AgentModel(sequelize);
 const CreatorTable = CreatorModel(sequelize);
 const NotificationPreferenceTable = NotificationPreferenceModel(sequelize);
 const LeadPayment = LeadPaymentModel(sequelize);
+const UserRole = UserRoleModel(sequelize, DataTypes);
 
 User.hasMany(PaymentDetails, {
   foreignKey: "userId",
@@ -54,12 +57,24 @@ NotificationPreferenceTable.belongsTo(User, {
   onDelete: "CASCADE",
 });
 
+// User-Role associations
+User.hasMany(UserRole, {
+  foreignKey: "userId",
+  as: "userRoles",
+  onDelete: "CASCADE",
+});
+UserRole.belongsTo(User, {
+  foreignKey: "userId",
+  onDelete: "CASCADE",
+});
+
 // Setup postModel associations
 setupAssociations(User);
 
 export {
   sequelize,
   User,
+  UserRole,
   PaymentDetails,
   AgentTable,
   CreatorTable,

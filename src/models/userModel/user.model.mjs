@@ -17,7 +17,7 @@ export default (sequelize) => {
       contact: { type: DataTypes.STRING, allowNull: false },
       password: { type: DataTypes.STRING, allowNull: false },
       role: {
-        type: DataTypes.ENUM("buyer", "agent", "admin", "creator"),
+        type: DataTypes.ENUM("buyer", "agent", "admin", "creator", "finance_admin", "creator_admin", "moderator_admin"),
         allowNull: false,
       },
       // Store IDs of users that follow this user
@@ -42,6 +42,17 @@ export default (sequelize) => {
       isDeleted: { type: DataTypes.BOOLEAN, defaultValue: false },
       stripeAccountId: { type: DataTypes.STRING, allowNull: true },
       isRentalCompany: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: true },
+      is_admin: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+        comment: "Whether user has admin privileges",
+      },
+      admin_status: {
+        type: DataTypes.ENUM("active", "inactive", "suspended"),
+        allowNull: true,
+        comment: "Admin account status",
+      },
     },
     {
       tableName: "users",

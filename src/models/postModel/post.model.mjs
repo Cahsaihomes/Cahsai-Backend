@@ -186,6 +186,10 @@ export default (sequelize) => {
       type: DataTypes.JSON,
       allowNull: true,
     },
+    productLink: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   });
 
   return Post;

@@ -10,7 +10,7 @@ import { initializeDefaultRoles } from "./utils/initializeRoles.mjs";
   try {
     await sequelize.authenticate();
     console.log("✅ Database connected"); 
-    await sequelize.sync({ alter: false });
+    await sequelize.sync({ alter: true });
     console.log("✅ Database synchronized");
     
     // Initialize default roles

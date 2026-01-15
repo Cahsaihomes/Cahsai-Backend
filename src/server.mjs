@@ -31,7 +31,7 @@ import { initializeDefaultRoles } from "./utils/initializeRoles.mjs";
     ];
     const io = new Server(httpServer, {
       cors: {
-      origin: "*",
+      origin: allowedOrigins,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
       credentials: true
       },

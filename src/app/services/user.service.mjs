@@ -45,18 +45,6 @@ export const registerUser = async (data) => {
     };
   }
 
-  const existingContact = await User.findOne({
-    where: { contact: value.contact },
-  });
-  if (existingContact) {
-    return {
-      status: "error",
-      code: 409,
-      message: "Duplicate entry",
-      errors: "Contact number already exists!",
-    };
-  }
-
   const hashedPassword = await bcrypt.hash(value.password, 10);
 
   let performancePoints = 0;

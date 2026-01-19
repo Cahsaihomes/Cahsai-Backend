@@ -82,7 +82,7 @@ export default (sequelize) => {
     // ===== NEW RENTAL FIELDS =====
     listing_type: {
       type: DataTypes.ENUM("FOR_SALE", "FOR_RENT", "STAY"),
-      defaultValue: "FOR_SALE",
+      defaultValue: "STAY",
       allowNull: true,
     },
     monthly_rent: {

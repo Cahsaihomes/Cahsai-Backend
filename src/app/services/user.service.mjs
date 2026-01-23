@@ -458,7 +458,7 @@ export const resetPassword = async ({ email, newPassword }) => {
 
   const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-  await user.update({ passwordHash: hashedPassword });
+  await user.update({ password: hashedPassword });
 
   return { status: "success", message: "Password reset successfully" };
 };

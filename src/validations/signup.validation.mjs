@@ -67,18 +67,9 @@ export const paymentDetailsSchema = Joi.object({
     "any.only": "User Id is required",
     "any.required": "User Id is required",
   }),
-  brokerageName: Joi.string().required().messages({
-    "any.only": "Brokerage Name is required",
-    "any.required": "Brokerage Name is required",
-  }),
-  mlsLicenseNumber: Joi.string().required().messages({
-    "any.only": "MLS License Number is required",
-    "any.required": "MLS License Number is required",
-  }),
-  mlsAssociation: Joi.string().required().messages({
-    "any.only": "MLS Association is required",
-    "any.required": "MLS Association is required",
-  }),
+  brokerageName: Joi.string().optional(),
+  mlsLicenseNumber: Joi.string().optional(),
+  mlsAssociation: Joi.string().optional(),
   cardHolderName: Joi.string().required().messages({
     "any.only": "Card Holder Name is required",
     "any.required": "Card Holder Name is required",
@@ -124,18 +115,9 @@ export const creatorSchema = Joi.object({
     "any.required": "User Id is required",
   }),
   linkedinUrl: Joi.string().uri().optional(),
-  brokerageName: Joi.string().required().messages({
-    "any.only": "Brokerage Name is required",
-    "any.required": "Brokerage Name is required",
-  }),
-  mlsLicenseNumber: Joi.string().required().messages({
-    "any.only": "MLS License Number is required",
-    "any.required": "MLS License Number is required",
-  }),
-  mlsAssociation: Joi.string().required().messages({
-    "any.only": "MLS Association is required",
-    "any.required": "MLS Association is required",
-  }),
+  brokerageName: Joi.string().optional(),
+  mlsLicenseNumber: Joi.string().optional(),
+  mlsAssociation: Joi.string().optional(),
   avatarUrl: Joi.string().optional(),
   instagramUsername: Joi.string().optional(),
   areasServed: Joi.array().items(Joi.string()).optional(),

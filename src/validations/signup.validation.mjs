@@ -63,18 +63,18 @@ export const baseUserSchema = Joi.object({
 });
 
 export const paymentDetailsSchema = Joi.object({
-  userId: Joi.number().integer().required().messages({
+  userId: Joi.number().integer().optional().messages({
     "any.only": "User Id is required",
     "any.required": "User Id is required",
   }),
   brokerageName: Joi.string().optional(),
   mlsLicenseNumber: Joi.string().optional(),
   mlsAssociation: Joi.string().optional(),
-  cardHolderName: Joi.string().required().messages({
+  cardHolderName: Joi.string().optional().messages({
     "any.only": "Card Holder Name is required",
     "any.required": "Card Holder Name is required",
   }),
-  cardNumber: Joi.string().creditCard().required().messages({
+  cardNumber: Joi.string().creditCard().optional().messages({
     "any.only": "Card Number is required",
     "any.required": "Card Number is required",
   }),
@@ -83,7 +83,7 @@ export const paymentDetailsSchema = Joi.object({
   //   "any.required": "Card CVV is required",
   // }),
   cardBrand: Joi.string().optional(),
-  cardExpiryDate: Joi.string().required().messages({
+  cardExpiryDate: Joi.string().optional().messages({
     "any.only": "Card Expiry (MM/YY) is required",
     "any.required": "Card Expiry (MM/YY) is required",
   }),
@@ -92,7 +92,7 @@ export const paymentDetailsSchema = Joi.object({
   //   .integer()
   //   .min(new Date().getFullYear())
   //   .optional(),
-  billingAddress: Joi.string().required().messages({
+  billingAddress: Joi.string().optional().messages({
     "any.only": "Billing Address is required",
     "any.required": "Billing Address is required",
   }),

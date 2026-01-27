@@ -24,28 +24,24 @@ import { Op } from "sequelize";
 import sequelizeConn from "../../config/database.mjs";
 import postRepo from "../repositories/post.repo.mjs";
 export const registerUser = async (data) => {
-  const { error, value } = baseUserSchema.validate(data, { abortEarly: false });
-  if (error) {
-    return {
-      status: "error",
-      code: 400,
-      message: "Validation failed",
-      // errors: error.details.map((err) => err.message),
-      errors: error.details[0].message,
-    };
+  // No validation - allow all fields to be optional
+  const value = data;
   
-  }
-  const existingEmail = await User.findOne({ where: { email: value.email } });
-  if (existingEmail) {
-    return {
-      status: "error",
-      code: 409,
-      message: "Duplicate entry",
-      errors: "Email already exists!",
-    };
+  // Allow email duplicate check only if email is provided
+  if (value.email) {
+    const existingEmail = await User.findOne({ where: { email: value.email } });
+    if (existingEmail) {
+      return {
+        status: "error",
+        code: 409,
+        message: "Duplicate entry",
+        errors: "Email already exists!",
+      };
+    }
   }
 
-  const hashedPassword = await bcrypt.hash(value.password, 10);
+  // Set default values for password (null if missing) and role (buyer if missing)
+  const hashedPassword = value.password ? await bcrypt.hash(value.password, 10) : null;
 
   let performancePoints = 0;
 
@@ -54,14 +50,14 @@ export const registerUser = async (data) => {
   }
 
   const user = await User.create({
-    first_name: value.first_name,
-    last_name: value.last_name,
-    user_name: value.user_name,
-    email: value.email,
-    contact: value.contact,
+    first_name: value.first_name || null,
+    last_name: value.last_name || null,
+    user_name: value.user_name || null,
+    email: value.email || null,
+    contact: value.contact || null,
     password: hashedPassword,
-    role: value.role,
-    acceptedTerms: value.acceptedTerms,
+    role: value.role || "buyer",
+    acceptedTerms: value.acceptedTerms || false,
     avatarUrl: null,
     performancePoints,
   });

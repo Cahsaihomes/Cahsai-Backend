@@ -224,6 +224,7 @@ export const getAllClipsSortedByViewsService = async () => {
       createdAt: post.createdAt,
       postedAgo,
       views,
+      discoveryStay: post.discoveryStay || false,
       creator: creator ? {
         id: creator.id,
         first_name: creator.first_name,
@@ -279,6 +280,7 @@ export const getTopPerformingClipService = async () => {
     createdAt: topPost.createdAt,
     postedAgo,
     views: topStats.views,
+    discoveryStay: topPost.discoveryStay || false,
     creator: creator ? {
       id: creator.id,
       first_name: creator.first_name,

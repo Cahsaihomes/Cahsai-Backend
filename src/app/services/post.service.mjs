@@ -76,6 +76,7 @@ export const getUserPosts = async (userId) => {
         postType: raw.postType || null,
         linkedPostId: raw.linkedPostId || null,
         features: raw.features || null,
+        discoveryStay: raw.discoveryStay || false,
       };
     }),
   );
@@ -147,6 +148,7 @@ export const getPaginatedPosts = async (page, pageSize) => {
       postType: raw.postType || null,
       linkedPostId: raw.linkedPostId || null,
       // features: raw.features || null,
+      discoveryStay: raw.discoveryStay || false,
     };
   });
   return {
@@ -363,6 +365,7 @@ export const getAllPosts = async () => {
         postType: raw.postType || null,
         linkedPostId: raw.linkedPostId || null,
         features: raw.features || null,
+        discoveryStay: raw.discoveryStay || false,
       };
     }),
   );

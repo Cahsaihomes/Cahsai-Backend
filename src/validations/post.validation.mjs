@@ -42,6 +42,8 @@ export const createPostValidation = Joi.object({
     .try(Joi.number(), Joi.string().allow("", null)),
   is_verified_manager: Joi.alternatives()
     .try(Joi.boolean(), Joi.string().valid("true", "false")),
+  discoveryStay: Joi.alternatives()
+    .try(Joi.boolean(), Joi.string().valid("true", "false")),
 })
 .options({ allowUnknown: true });
 

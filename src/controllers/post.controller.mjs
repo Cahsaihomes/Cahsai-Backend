@@ -30,6 +30,7 @@ export const createPost = async (req, res) => {
       req.body.is_verified_manager
     );
     req.body.publishToWatchHomes = normalizeBoolean(req.body.publishToWatchHomes);
+    req.body.discoveryStay = normalizeBoolean(req.body.discoveryStay);
     req.body.yearBuilt = normalizeNumber(req.body.yearBuilt);
     req.body.hoaFees = normalizeNumber(req.body.hoaFees);
     req.body.linkedPostId = normalizeNumber(req.body.linkedPostId);
@@ -113,6 +114,7 @@ export const createPost = async (req, res) => {
         postType: req.body.postType || null,
         linkedPostId: req.body.linkedPostId || null,
         productLink: req.body.productLink || null,
+        discoveryStay: req.body.discoveryStay || false,
       },
       req.user.id
     );
@@ -275,6 +277,7 @@ export const updatePost = async (req, res) => {
     if (req.body.postType) updateData.postType = req.body.postType;
     if (req.body.linkedPostId) updateData.linkedPostId = req.body.linkedPostId;
     if (req.body.productLink) updateData.productLink = req.body.productLink;
+    if (req.body.discoveryStay !== undefined) updateData.discoveryStay = req.body.discoveryStay;
     if (req.body.features) {
       try {
         updateData.features = JSON.parse(req.body.features);

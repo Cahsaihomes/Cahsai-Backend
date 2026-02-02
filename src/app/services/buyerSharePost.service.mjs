@@ -18,7 +18,19 @@ export const sharePost = async (userId, postId) => {
 };
 
 export const getSharedPosts = async (userId) => {
-  return await buyerShareRepo.getSharedPostsByUser(userId);
+  const sharedItems = await buyerShareRepo.getSharedPostsByUser(userId);
+  
+  // Enrich each shared item with post data containing discoveryStay
+  return sharedItems.map(item => {
+    const data = item.toJSON ? item.toJSON() : item;
+    return {
+      ...data,
+      post: {
+        ...data.post,
+        discoveryStay: data.post?.discoveryStay || false,
+      },
+    };
+  });
 };
 
 export const unsharePost = async (userId, postId) => {

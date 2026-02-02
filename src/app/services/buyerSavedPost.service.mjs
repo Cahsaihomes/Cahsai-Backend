@@ -19,7 +19,24 @@ export const savePost = async (userId, postId) => {
 };
 
 export const getSavedPosts = async (userId) => {
-  return await buyerSavedPostRepo.getSavedPostsByUser(userId);
+  const savedItems = await buyerSavedPostRepo.getSavedPostsByUser(userId);
+  
+  // Enrich each saved item with full post data
+  return await Promise.all(
+    savedItems.map(async (item) => {
+      const post = await Post.findByPk(item.postId);
+      if (!post) return null;
+      
+      const raw = post.toJSON ? post.toJSON() : post;
+      return {
+        ...item.toJSON ? item.toJSON() : item,
+        post: {
+          ...raw,
+          discoveryStay: raw.discoveryStay || false,
+        },
+      };
+    })
+  ).then(items => items.filter(i => i !== null));
 };
 
 export const unsavePost = async (userId, postId) => {

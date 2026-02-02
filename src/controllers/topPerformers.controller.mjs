@@ -603,7 +603,7 @@ export async function getAllPosts(req, res) {
         as: 'likes',
         attributes: ['id'],
       }],
-      attributes: ['id', 'title', 'description', 'video', 'images', 'createdAt', 'price'],
+      attributes: ['id', 'title', 'description', 'video', 'images', 'createdAt', 'price', 'discoveryStay'],
       order: [['createdAt', 'DESC']],
     });
 
@@ -623,6 +623,7 @@ export async function getAllPosts(req, res) {
         duration: 'N/A', // Video duration not stored in database
         imagesUrl: post.images && Array.isArray(post.images) ? post.images : [], // All images array
         videoUrl: post.video || null, // Video URL
+        discoveryStay: post.discoveryStay || false,
       };
     });
 

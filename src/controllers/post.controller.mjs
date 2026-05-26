@@ -41,33 +41,74 @@ export const createPost = async (req, res) => {
     const imageFiles = req.files?.post_images || [];
     const videoFiles = req.files?.post_videos || [];
 
-    if (imageFiles.length > 5) {
+    const parseUrlArray = (value) => {
+      if (!value) return [];
+      if (Array.isArray(value)) return value.filter(Boolean);
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+      } catch {
+        return String(value)
+          .split(",")
+          .map((url) => url.trim())
+          .filter(Boolean);
+      }
+    };
+
+    const isCloudinaryMediaUrl = (url, resourceType) => {
+      try {
+        const parsed = new URL(url);
+        return (
+          parsed.protocol === "https:" &&
+          parsed.hostname === "res.cloudinary.com" &&
+          parsed.pathname.includes(`/${resourceType}/upload/`)
+        );
+      } catch {
+        return false;
+      }
+    };
+
+    const directImageUrls = parseUrlArray(req.body.imageUrls);
+    const directVideoUrls = parseUrlArray(req.body.videoUrls);
+
+    if (!directImageUrls.every((url) => isCloudinaryMediaUrl(url, "image"))) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid image upload URL.",
+      });
+    }
+
+    if (!directVideoUrls.every((url) => isCloudinaryMediaUrl(url, "video"))) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid video upload URL.",
+      });
+    }
+
+    if (imageFiles.length + directImageUrls.length > 5) {
       return res.status(400).json({
         status: "error",
         message: "You can upload a maximum of 5 images.",
       });
     }
 
-    if (videoFiles.length > 1) {
+    if (videoFiles.length + directVideoUrls.length > 5) {
       return res.status(400).json({
         status: "error",
-        message: "You can upload only 1 video.",
+        message: "You can upload a maximum of 5 videos.",
       });
     }
 
-    let imageUrls = [];
-    for (const file of imageFiles) {
-      const url = await uploadToCloudinary(file, "post_images");
-      imageUrls.push(url);
-    }
+    const uploadedImageUrls = await Promise.all(
+      imageFiles.map((file) => uploadToCloudinary(file, "post_images"))
+    );
+    const imageUrls = [...directImageUrls, ...uploadedImageUrls];
 
-    let videoUrl = null;
-    if (videoFiles.length > 0) {
-      videoUrl = await uploadToCloudinary(
-        videoFiles[0],
-        "post_videos"
-      );
-    }
+    const uploadedVideoUrls = await Promise.all(
+      videoFiles.map((file) => uploadToCloudinary(file, "post_videos"))
+    );
+    const videoUrls = [...directVideoUrls, ...uploadedVideoUrls];
+    const videoUrl = videoUrls[0] || null;
 
     /* =====================================================
        4️⃣ Parse array-like fields
@@ -98,6 +139,7 @@ export const createPost = async (req, res) => {
         features: featuresArray,
         images: imageUrls.length ? imageUrls : null,
         video: videoUrl,
+        videos: videoUrls.length ? videoUrls : null,
         forYou: true,
         isPromoted: false,
         street: req.body.street || null,
@@ -126,9 +168,16 @@ export const createPost = async (req, res) => {
     return res.status(201).json(result);
   } catch (error) {
     console.error("🔥 Error in createPost:", error);
+    const isCloudinaryError = Boolean(error?.http_code);
+    const isSequelizeError = error?.name?.startsWith?.("Sequelize");
+
     return res.status(500).json({
       status: "error",
-      message: "Internal Server Error",
+      message: isCloudinaryError
+        ? "Media upload failed. Please try again with a smaller or different file."
+        : isSequelizeError
+          ? "Post could not be saved. Please try again."
+          : "Internal Server Error",
     });
   }
 };
@@ -180,6 +229,22 @@ export const getAllPosts = async (req, res) => {
     return res.status(200).json(result);
   } catch (error) {
     console.error("Error in getAllPosts:", error);
+    return res
+      .status(500)
+      .json({ status: "error", message: "Internal Server Error" });
+  }
+};
+
+export const getFeedPosts = async (req, res) => {
+  try {
+    const result = await postService.getFeedPosts({
+      type: req.query.type,
+      cursor: req.query.cursor,
+      limit: req.query.limit,
+    });
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error in getFeedPosts:", error);
     return res
       .status(500)
       .json({ status: "error", message: "Internal Server Error" });

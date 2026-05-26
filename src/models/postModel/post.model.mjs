@@ -64,6 +64,10 @@ export default (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    videos: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
     forYou: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,

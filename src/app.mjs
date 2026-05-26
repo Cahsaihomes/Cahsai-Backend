@@ -21,6 +21,7 @@ import rakutenRoutes from "./routes/rakuten.routes.mjs"
 import propertyRoutes from "./routes/properties.routes.mjs";
 import rentalApplicationRoutes from "./routes/rentalApplication.routes.mjs"
 import adminRoutes from "./routes/admin.routes.mjs";
+import uploadRoutes from "./routes/upload.routes.mjs";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
@@ -67,6 +68,7 @@ app.use("/api/rakuten", rakutenRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/rental-applications", rentalApplicationRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/uploads", uploadRoutes);
 
 app.use(errorHandler);
 

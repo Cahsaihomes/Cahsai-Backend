@@ -1,6 +1,14 @@
 // helpers.mjs
 import cloudinary from "../config/cloudnary.mjs";
 
+const optimizedVideoTransformation = {
+  fetch_format: "mp4",
+  quality: "auto:good",
+  video_codec: "auto",
+  width: 1080,
+  crop: "limit",
+};
+
 export const getCardBrand = (cardNumber) => {
   if (!cardNumber) return "Unknown";
 
@@ -42,17 +50,31 @@ export const uploadToCloudinary = (file, folder) => {
       folder: folder
     });
     
-    let resourceType = "auto";
+    const isPostVideo = folder === "post_videos" || file.mimetype?.startsWith("video/");
+    const resourceType = isPostVideo ? "video" : "auto";
+    const uploadOptions = {
+      folder,
+      resource_type: resourceType,
+      ...(isPostVideo
+        ? {
+            eager: [optimizedVideoTransformation],
+            eager_async: false,
+          }
+        : {}),
+    };
+
     cloudinary.uploader
       .upload_stream(
-        { folder: folder, resource_type: resourceType },
+        uploadOptions,
         (error, result) => {
           if (error) {
             console.error('Cloudinary upload error:', error);
             reject(error);
           } else {
-            console.log('Cloudinary upload success:', result.secure_url);
-            resolve(result.secure_url);
+            const optimizedUrl = result.eager?.[0]?.secure_url;
+            const finalUrl = optimizedUrl || result.secure_url;
+            console.log('Cloudinary upload success:', finalUrl);
+            resolve(finalUrl);
           }
         }
       )

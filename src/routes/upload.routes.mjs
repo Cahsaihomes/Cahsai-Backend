@@ -7,6 +7,7 @@ const router = express.Router();
 
 const allowedFolders = new Set(["post_images", "post_videos"]);
 const allowedResourceTypes = new Set(["image", "video"]);
+const optimizedVideoTransformation = "f_mp4,q_auto:good,vc_auto,w_1080,c_limit";
 
 router.post("/cloudinary-signature", isAuthenticated, (req, res) => {
   try {
@@ -27,9 +28,16 @@ router.post("/cloudinary-signature", isAuthenticated, (req, res) => {
     const folder = req.body.folder;
     const resourceType = req.body.resourceType;
     const timestamp = Math.round(Date.now() / 1000);
+    const eager =
+      resourceType === "video" && folder === "post_videos"
+        ? optimizedVideoTransformation
+        : undefined;
+    const signatureParams = eager
+      ? { folder, timestamp, eager }
+      : { folder, timestamp };
 
     const signature = cloudinary.utils.api_sign_request(
-      { folder, timestamp },
+      signatureParams,
       config.CLOUDINARY_API_SECRET
     );
 
@@ -41,6 +49,7 @@ router.post("/cloudinary-signature", isAuthenticated, (req, res) => {
         folder,
         resourceType,
         timestamp,
+        eager,
         signature,
       },
     });

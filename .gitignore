@@ -13,3 +13,7 @@ node_modules
 # pnpm-debug.log*
 # check-db.mjs
 # run-migration.mjs
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+.gitignore

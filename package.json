@@ -4,8 +4,8 @@
   "main": "server.mjs",
   "type": "module",
   "scripts": {
-    "dev": "nodemon src/server.mjs",
-    "start": "node src/server.mjs",
+    "dev": "node init && nodemon src/server.mjs",
+    "start": "node init && node src/server.mjs",
     "migrate:notifications": "node src/migrations/fix-notification-table.mjs"
   },
   "keywords": [],

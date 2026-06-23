@@ -58,7 +58,7 @@ export const uploadToCloudinary = (file, folder) => {
       ...(isPostVideo
         ? {
             eager: [optimizedVideoTransformation],
-            eager_async: true,
+            eager_async: false,
           }
         : {}),
     };

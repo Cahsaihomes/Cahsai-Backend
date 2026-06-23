@@ -32,9 +32,8 @@ router.post("/cloudinary-signature", isAuthenticated, (req, res) => {
       resourceType === "video" && folder === "post_videos"
         ? optimizedVideoTransformation
         : undefined;
-    const eagerAsync = eager ? "true" : undefined;
     const signatureParams = eager
-      ? { folder, timestamp, eager, eager_async: eagerAsync }
+      ? { folder, timestamp, eager }
       : { folder, timestamp };
 
     const signature = cloudinary.utils.api_sign_request(
@@ -51,7 +50,6 @@ router.post("/cloudinary-signature", isAuthenticated, (req, res) => {
         resourceType,
         timestamp,
         eager,
-        eagerAsync: Boolean(eagerAsync),
         signature,
       },
     });
